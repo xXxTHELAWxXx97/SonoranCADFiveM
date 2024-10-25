@@ -116,22 +116,27 @@ Config.GetPluginConfig = function(pluginName)
                 disableReason = 'Missing configuration file'
             }
         else
-            local loadedPlugin, pluginError = load(correctConfig)
+            local configChunk = correctConfig:match("local config = {.-\n}") .. "\nreturn config"
+            if not configChunk then
+                errorLog("No config table found in the string.")
+            end
+            local tempEnv = {}
+            setmetatable(tempEnv, { __index = _G })  -- Allow access to global functions if needed
+            local loadedPlugin, pluginError = load(configChunk, 'config', 't', tempEnv)
             if loadedPlugin then
+                -- Execute and capture the returned config table
                 local success, res = pcall(loadedPlugin)
                 if not success then
-                    errorLog(
-                        ('Plugin %s failed to load due to error: %s'):format(
-                            pluginName, res))
+                    errorLog(('Plugin %s failed to load due to error: %s'):format(pluginName, res))
                     Config.plugins[pluginName] = {
                         enabled = false,
                         disableReason = 'Failed to load'
                     }
                     return {enabled = false, disableReason = 'Failed to load'}
                 end
-                if _G.config and type(_G.config) == "table" then
+                if res and type(res) == "table" then
                     -- Assign the extracted config to Config.plugins[pluginName]
-                    Config.plugins[pluginName] = _G.config
+                    Config.plugins[pluginName] = res
                 else
                     -- Handle case where config is not available
                     errorLog(
@@ -228,22 +233,27 @@ Config.LoadPlugin = function(pluginName, cb)
                 disableReason = 'Missing configuration file'
             })
         else
-            local loadedPlugin, pluginError = load(correctConfig)
+            local configChunk = correctConfig:match("local config = {.-\n}") .. "\nreturn config"
+            if not configChunk then
+                errorLog("No config table found in the string.")
+            end
+            local tempEnv = {}
+            setmetatable(tempEnv, { __index = _G })  -- Allow access to global functions if needed
+            local loadedPlugin, pluginError = load(configChunk, 'config', 't', tempEnv)
             if loadedPlugin then
+                -- Execute and capture the returned config table
                 local success, res = pcall(loadedPlugin)
                 if not success then
-                    errorLog(
-                        ('Plugin %s failed to load due to error: %s'):format(
-                            pluginName, res))
+                    errorLog(('Plugin %s failed to load due to error: %s'):format(pluginName, res))
                     Config.plugins[pluginName] = {
                         enabled = false,
                         disableReason = 'Failed to load'
                     }
                     return {enabled = false, disableReason = 'Failed to load'}
                 end
-                if _G.config and type(_G.config) == "table" then
+                if res and type(res) == "table" then
                     -- Assign the extracted config to Config.plugins[pluginName]
-                    Config.plugins[pluginName] = _G.config
+                    Config.plugins[pluginName] = res
                 else
                     -- Handle case where config is not available
                     errorLog(
@@ -253,10 +263,10 @@ Config.LoadPlugin = function(pluginName, cb)
                         enabled = false,
                         disableReason = 'Invalid or missing config'
                     }
-                    return cb({
+                    return {
                         enabled = false,
                         disableReason = 'Invalid or missing config'
-                    })
+                    }
                 end
                 if Config.critError then
                     Config.plugins[pluginName].enabled = false

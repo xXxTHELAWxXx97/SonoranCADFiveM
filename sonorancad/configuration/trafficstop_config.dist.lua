@@ -4,7 +4,8 @@
     Plugin Configuration
 
     Put all needed configuration in this file.
-]] config = {
+]]
+local config = {
     enabled = false,
     pluginName = "trafficstop", -- name your plugin here
     pluginAuthor = "SonoranCAD", -- author

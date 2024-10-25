@@ -1,11 +1,13 @@
 --[[
-    Sonoran Plugins
+
+Sonoran Plugins
 
     frameworksupport Plugin Configuration
 
     Put all needed configuration in this file.
 
-]] local config = {
+]]
+local config = {
     enabled = true,
     configVersion = "1.2",
     pluginName = "frameworksupport", -- name your plugin here

@@ -5,7 +5,8 @@
 
     Put all needed configuration in this file.
 
-]] local config = {
+]]
+local config = {
     enabled = true,
     configVersion = "3.0",
     pluginName = "dispatchnotify", -- name your plugin here

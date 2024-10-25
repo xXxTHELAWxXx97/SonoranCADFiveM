@@ -4,7 +4,8 @@
     Plugin Configuration
 
     Put all needed configuration in this file.
-]] local config = {
+]]
+local config = {
     enabled = false,
     pluginName = "callcommands", -- name your plugin here
     pluginAuthor = "SonoranCAD", -- author

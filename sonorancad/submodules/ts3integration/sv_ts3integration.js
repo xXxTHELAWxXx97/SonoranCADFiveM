@@ -15,8 +15,6 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program in the file "LICENSE".  If not, see <http://www.gnu.org/licenses/>.
 */
-const fs = require('fs');
-const path = require('path');
 const { TeamSpeak, QueryProtocol } = require("ts3-nodejs-library");
 const configFilePath = path.join(__dirname, "../../configuration/ts3integration_config.json");
 const distFilePath = path.join(__dirname, "../../configuration/ts3integration_config.dist.json");
