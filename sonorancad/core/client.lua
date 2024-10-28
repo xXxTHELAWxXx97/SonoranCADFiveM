@@ -31,26 +31,73 @@ Config.GetPluginConfig = function(pluginName)
                                          '/configuration/' .. pluginName ..
                                              '_config.lua')
         if not correctConfig then
-            infoLog(
-                ('Plugin %s only has the default configurations file (%s_config.dist.lua)... Attempting to use default file'):format(
-                    pluginName, pluginName))
-            correctConfig = LoadResourceFile(GetCurrentResourceName(),
-                                             '/configuration/' .. pluginName ..
-                                                 '_config.dist.lua')
-        end
-        if not correctConfig then
             warnLog(
                 ('Plugin %s is missing critical configuration. Please check our plugin install guide at https://info.sonorancad.com/integration-submodules/integration-submodules/plugin-installation for steps to properly install.'):format(
                     pluginName))
+            Config.plugins[pluginName] = {
+                enabled = false,
+                disableReason = 'Missing configuration file'
+            }
+            return {
+                enabled = false,
+                disableReason = 'Missing configuration file'
+            }
         else
-            Config.plugins[pluginName] = correctConfig
-            if Config.critError then
-                Config.plugins[pluginName].enabled = false
-                Config.plugins[pluginName].disableReason = 'startup aborted'
-            elseif Config.plugins[pluginName].enabled == nil then
-                Config.plugins[pluginName].enabled = true
-            elseif Config.plugins[pluginName].enabled == false then
-                Config.plugins[pluginName].disableReason = 'Disabled'
+            local configChunk = correctConfig:match("local config = {.-\n}") ..
+                                    "\nreturn config"
+            if not configChunk then
+                errorLog("No config table found in the string.")
+            end
+            local tempEnv = {}
+            setmetatable(tempEnv, {__index = _G}) -- Allow access to global functions if needed
+            local loadedPlugin, pluginError =
+                load(configChunk, 'config', 't', tempEnv)
+            if loadedPlugin then
+                -- Execute and capture the returned config table
+                local success, res = pcall(loadedPlugin)
+                if not success then
+                    errorLog(
+                        ('Plugin %s failed to load due to error: %s'):format(
+                            pluginName, res))
+                    Config.plugins[pluginName] = {
+                        enabled = false,
+                        disableReason = 'Failed to load'
+                    }
+                    return {enabled = false, disableReason = 'Failed to load'}
+                end
+                if res and type(res) == "table" then
+                    -- Assign the extracted config to Config.plugins[pluginName]
+                    Config.plugins[pluginName] = res
+                else
+                    -- Handle case where config is not available
+                    errorLog(
+                        ('Plugin %s did not define a valid config table.'):format(
+                            pluginName))
+                    Config.plugins[pluginName] = {
+                        enabled = false,
+                        disableReason = 'Invalid or missing config'
+                    }
+                    return {
+                        enabled = false,
+                        disableReason = 'Invalid or missing config'
+                    }
+                end
+                if Config.critError then
+                    Config.plugins[pluginName].enabled = false
+                    Config.plugins[pluginName].disableReason = 'startup aborted'
+                elseif Config.plugins[pluginName].enabled == nil then
+                    Config.plugins[pluginName].enabled = true
+                elseif Config.plugins[pluginName].enabled == false then
+                    Config.plugins[pluginName].disableReason = 'Disabled'
+                end
+            else
+                errorLog(('Plugin %s failed to load due to error: %s'):format(
+                             pluginName, pluginError))
+                Config.plugins[pluginName] = {
+                    enabled = false,
+                    disableReason = 'Failed to load'
+                }
+                return {enabled = false, disableReason = 'Failed to load'}
             end
             return Config.plugins[pluginName]
         end
@@ -83,26 +130,73 @@ Config.LoadPlugin = function(pluginName, cb)
                                          '/configuration/' .. pluginName ..
                                              '_config.lua')
         if not correctConfig then
-            infoLog(
-                ('Plugin %s only has the default configurations file (%s_config.dist.lua)... Attempting to use default file'):format(
-                    pluginName, pluginName))
-            correctConfig = LoadResourceFile(GetCurrentResourceName(),
-                                             '/configuration/' .. pluginName ..
-                                                 '_config.dist.lua')
-        end
-        if not correctConfig then
             warnLog(
                 ('Plugin %s is missing critical configuration. Please check our plugin install guide at https://info.sonorancad.com/integration-submodules/integration-submodules/plugin-installation for steps to properly install.'):format(
                     pluginName))
+            Config.plugins[pluginName] = {
+                enabled = false,
+                disableReason = 'Missing configuration file'
+            }
+            return {
+                enabled = false,
+                disableReason = 'Missing configuration file'
+            }
         else
-            Config.plugins[pluginName] = correctConfig
-            if Config.critError then
-                Config.plugins[pluginName].enabled = false
-                Config.plugins[pluginName].disableReason = 'startup aborted'
-            elseif Config.plugins[pluginName].enabled == nil then
-                Config.plugins[pluginName].enabled = true
-            elseif Config.plugins[pluginName].enabled == false then
-                Config.plugins[pluginName].disableReason = 'Disabled'
+            local configChunk = correctConfig:match("local config = {.-\n}") ..
+                                    "\nreturn config"
+            if not configChunk then
+                errorLog("No config table found in the string.")
+            end
+            local tempEnv = {}
+            setmetatable(tempEnv, {__index = _G}) -- Allow access to global functions if needed
+            local loadedPlugin, pluginError =
+                load(configChunk, 'config', 't', tempEnv)
+            if loadedPlugin then
+                -- Execute and capture the returned config table
+                local success, res = pcall(loadedPlugin)
+                if not success then
+                    errorLog(
+                        ('Plugin %s failed to load due to error: %s'):format(
+                            pluginName, res))
+                    Config.plugins[pluginName] = {
+                        enabled = false,
+                        disableReason = 'Failed to load'
+                    }
+                    return {enabled = false, disableReason = 'Failed to load'}
+                end
+                if res and type(res) == "table" then
+                    -- Assign the extracted config to Config.plugins[pluginName]
+                    Config.plugins[pluginName] = res
+                else
+                    -- Handle case where config is not available
+                    errorLog(
+                        ('Plugin %s did not define a valid config table.'):format(
+                            pluginName))
+                    Config.plugins[pluginName] = {
+                        enabled = false,
+                        disableReason = 'Invalid or missing config'
+                    }
+                    return {
+                        enabled = false,
+                        disableReason = 'Invalid or missing config'
+                    }
+                end
+                if Config.critError then
+                    Config.plugins[pluginName].enabled = false
+                    Config.plugins[pluginName].disableReason = 'startup aborted'
+                elseif Config.plugins[pluginName].enabled == nil then
+                    Config.plugins[pluginName].enabled = true
+                elseif Config.plugins[pluginName].enabled == false then
+                    Config.plugins[pluginName].disableReason = 'Disabled'
+                end
+            else
+                errorLog(('Plugin %s failed to load due to error: %s'):format(
+                             pluginName, pluginError))
+                Config.plugins[pluginName] = {
+                    enabled = false,
+                    disableReason = 'Failed to load'
+                }
+                return {enabled = false, disableReason = 'Failed to load'}
             end
             return Config.plugins[pluginName]
         end

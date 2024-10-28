@@ -18,7 +18,7 @@ server_scripts {
     ,'core/unittracking.lua'
     ,'core/updater.lua'
     ,'core/apicheck.lua'
-    ,'submodules/**/*_config.lua'
+    ,'configuration/**/*_config.lua'
     ,'core/plugin_loader.lua'
     ,'submodules/**/sv_*.lua'
     ,'submodules/**/sv_*.js'
@@ -30,7 +30,7 @@ client_scripts {
     ,'core/shared_functions.lua'
     ,'core/client.lua'
     ,'core/lighting.lua'
-    ,'submodules/**/*_config.lua'
+    ,'configuration/**/*_config.lua'
     ,'submodules/**/cl_*.lua'
     ,'submodules/**/cl_*.js'
 }
