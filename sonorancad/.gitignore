@@ -6,4 +6,3 @@ unzip/
 stream/*
 !stream/.gitkeep
 npm-shrinkwrap.json
-package.json
