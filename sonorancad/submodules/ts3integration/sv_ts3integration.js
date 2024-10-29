@@ -18,6 +18,8 @@ along with this program in the file "LICENSE".  If not, see <http://www.gnu.org/
 const { TeamSpeak, QueryProtocol } = require("ts3-nodejs-library");
 const configFilePath = path.join(GetResourcePath(GetCurrentResourceName()), "/configuration/ts3integration_config.json");
 const distFilePath = path.join(GetResourcePath(GetCurrentResourceName()), "/configuration/ts3integration_config.dist.json");
+const luaConfigPath = path.join(GetResourcePath(GetCurrentResourceName()), "/configuration/ts3integration_config.lua");
+const distLuaConfigPath = path.join(GetResourcePath(GetCurrentResourceName()), "/configuration/ts3integration_config.dist.lua");
 var clientsToAdd = [];
 var clientsToRemove = [];
 
@@ -46,7 +48,7 @@ function loadConfig() {
 
 // Load the configuration
 const ts3config = loadConfig();
-
+const unusedConfig = exports.sonorancad.GetPluginConfig("ts3integration");
 
 // Check if the config values are set, or if we should use the server convars
 const ts3UserConvar = GetConvar("sonorants3_server_user", 'false');

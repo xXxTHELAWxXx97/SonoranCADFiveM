@@ -58,6 +58,10 @@ local function CopyFile(old_path, new_path)
     return true
 end
 
+exports('GetPluginConfig', function(pluginName)
+    return Config.GetPluginConfig(pluginName)
+end)
+
 Config.GetPluginConfig = function(pluginName)
     local correctConfig = nil
     if Config.plugins[pluginName] ~= nil then

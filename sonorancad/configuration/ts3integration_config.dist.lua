@@ -8,7 +8,11 @@
 
 local config = {
     enabled = false,
-    ignoreLoader = true
+    pluginName = "ts3integration", -- name your plugin here
+    pluginAuthor = "SonoranCAD", -- author
+    requiresPlugins = {}, -- required plugins for this plugin to work, separated by commas
 }
 
-Config.RegisterPluginConfig("ts3integration", config)
+if config.enabled then
+    Config.RegisterPluginConfig(config.pluginName, config)
+end

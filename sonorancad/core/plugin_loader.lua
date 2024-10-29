@@ -7,6 +7,7 @@
 ]]
 
 CreateThread(function()
+    Wait(5000)
     while Config.apiVersion == -1 do Wait(10) end
     if Config.critError then logError("ERROR_ABORT") end
     for k, v in pairs(Config.plugins) do
