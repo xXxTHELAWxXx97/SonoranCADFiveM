@@ -11,6 +11,23 @@ Config.RegisterPluginConfig = function(pluginName, configs)
     table.insert(Plugins, pluginName)
 end
 
+--[[
+    @function getApiMode
+    @description Returns the API mode for the current server. 0 = Development, 1 = Production
+    @returns int
+]]
+function getApiMode()
+    if Config.mode == nil then
+        return 1
+    elseif Config.mode == 'development' then
+        return 0
+    else
+        return 1
+    end
+end
+
+exports('getApiMode', getApiMode())
+
 Config.GetPluginConfig = function(pluginName)
     local correctConfig = nil
     if Config.plugins[pluginName] ~= nil then
