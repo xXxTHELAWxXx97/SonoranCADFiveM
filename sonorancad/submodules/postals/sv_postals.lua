@@ -27,6 +27,8 @@ CreateThread(function()
 						errorLog(('[postals] The configured postals resource (%s) is in a bad state (%s). Please check it.'):format(pluginConfig.nearestPostalResourceName, state))
 						shouldStop = true
 					end
+				else
+					postalFile = LoadResourceFile(pluginConfig.nearestPostalResourceName, GetResourceMetadata(pluginConfig.nearestPostalResourceName, 'postal_file'))
 				end
 			elseif pluginConfig.mode and pluginConfig.mode == 'file' then
 				local postalFile = LoadResourceFile(GetCurrentResourceName(), ('/submodules/postals/%s'):format(pluginConfig.customPostalCodesFile))
@@ -35,11 +37,20 @@ CreateThread(function()
 					shouldStop = true
 				end
 			end
+			if postalFile == nil then
+				errorLog('Failed to open postals file for reading.')
+				shouldStop = true
+			end
 			if shouldStop then
 				pluginConfig.enabled = false
 				pluginConfig.disableReason = 'postal resource incorrect'
 				errorLog('Force disabling plugin to prevent client errors.')
 				return
+			end
+
+			postals = json.decode(postalFile)
+			for i, postal in ipairs(postals) do
+				postals[i] = {vec(postal.x, postal.y), code = postal.code}
 			end
 
 			PostalsCache = {}
@@ -67,30 +78,20 @@ CreateThread(function()
 			registerApiType('SET_POSTALS', 'general')
 
 			CreateThread(function()
-				while Config.apiVersion == -1 do
+				while Config.apiVersion == -1 or postals == nil do
 					Wait(1000)
 				end
 				if Config.apiVersion < 4 or not Config.apiSendEnabled then
 					return
 				end
-				if pluginConfig.customPostalCodesFile ~= '' and pluginConfig.customPostalCodesFile ~= nil then
-					postalFile = LoadResourceFile(GetCurrentResourceName(), ('submodules/postals/%s'):format(pluginConfig.customPostalCodesFile))
-				else
-					postalFile = LoadResourceFile(pluginConfig.nearestPostalResourceName, GetResourceMetadata(pluginConfig.nearestPostalResourceName, 'postal_file'))
-				end
-				if postalFile == nil then
-					errorLog('Failed to open postals file for reading.')
-				else
-					performApiRequest(postalFile, 'SET_POSTALS', function()
-					end)
-					postals = json.decode(postalFile)
-					for i, postal in ipairs(postals) do
-						postals[i] = {vec(postal.x, postal.y), code = postal.code}
-					end
-				end
+				performApiRequest(postalFile, 'SET_POSTALS', function()
+				end)
 			end)
 
 			function getPostalFromVector3(coords)
+				if not coords or postals == nil then
+					return nil
+				end
 				local _total = #postals
 				local _nearestIndex, _nearestD
 				coords = vector2(coords.x, coords.y)
