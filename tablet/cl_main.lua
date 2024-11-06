@@ -29,7 +29,7 @@ Citizen.CreateThread(function()
 	end
 	local convar = GetConvar("sonorantablet_cadUrl", tabletURL)
 	local comId = convar:match("comid=(%w+)")
-	if comId ~= "" then
+	if comId ~= "" and comId ~= nil then
 		SetModuleUrl("cad", GetConvar("sonorantablet_cadUrl", tabletURL .. 'login?comid='..comId), true)
 	else
 		SetModuleUrl("cad", GetConvar("sonorantablet_cadUrl", tabletURL), false)

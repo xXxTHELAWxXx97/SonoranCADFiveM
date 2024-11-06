@@ -26,7 +26,7 @@ function getApiMode()
     end
 end
 
-exports('getApiMode', getApiMode())
+exports('getApiMode', getApiMode)
 
 Config.GetPluginConfig = function(pluginName)
     local correctConfig = nil
@@ -41,8 +41,9 @@ Config.GetPluginConfig = function(pluginName)
         end
         return Config.plugins[pluginName]
     else
-        if pluginName == 'yourpluginname' then
-            return {enabled = false, disableReason = 'Template plugin'}
+        if pluginName == 'apicheck' or pluginName == 'livemap' or pluginName ==
+            'smartsigns' then
+            return {enabled = false, disableReason = 'deprecated plugin'}
         end
         correctConfig = LoadResourceFile(GetCurrentResourceName(),
                                          '/configuration/' .. pluginName ..
