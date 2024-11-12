@@ -38,7 +38,8 @@ CreateThread(function()
         local unitCache = exports['sonorancad']:GetUnitCache()
         removeKeyAt(callCache, function(k, v)
             -- only include active calls
-            if v.dispatch.status ~= 1 then return true end
+            -- Jordan 11/5 - This is causing pending calls to not show up in the mini cad
+            -- if v.dispatch.status ~= 1 then return true end
 
             -- add unit info to the call (idk if this is really needed)
             v.dispatch.units = {}
@@ -70,11 +71,11 @@ CreateThread(function()
     AddEventHandler("SonoranCAD::mini:CallSync_S", function()
         TriggerClientEvent("SonoranCAD::mini:CallSync", source, CallCache, EmergencyCache)
     end)
-    
+
     AddEventHandler("SonoranCAD::pushevents:DispatchNote", function(data)
         TriggerClientEvent("SonoranCAD::mini:NewNote", -1, data)
     end)
-    
+
     RegisterServerEvent("SonoranCAD::mini:OpenMini")
     AddEventHandler("SonoranCAD::mini:OpenMini", function ()
         local ident = exports["sonorancad"]:GetUnitByPlayerId(source)
@@ -84,7 +85,7 @@ CreateThread(function()
         TriggerClientEvent("SonoranCAD::mini:CallSync", source, CallCache, EmergencyCache)
         TriggerClientEvent("SonoranCAD::mini:OpenMini:Return", source, true, ident.id)
     end)
-    
+
     RegisterServerEvent("SonoranCAD::mini:AttachToCall")
     AddEventHandler("SonoranCAD::mini:AttachToCall", function(callId)
         local ident = exports["sonorancad"]:GetUnitByPlayerId(source)

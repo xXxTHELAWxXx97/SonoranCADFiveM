@@ -20,12 +20,19 @@ Citizen.CreateThread(function()
 	InitModuleSize("cad")
 	InitModuleSize("hud")
 	InitModuleConfig("hud")
-	local convar = GetConvar("sonorantablet_cadUrl", 'https://sonorancad.com/')
+	local apiMode = exports['sonorancad']:getApiMode()
+	local tabletURL = ""
+	if apiMode == 1 then
+		tabletURL = "https://sonorancad.com/"
+	elseif apiMode == 0 then
+		tabletURL = "https://cad.dev.sonoransoftware.com/"
+	end
+	local convar = GetConvar("sonorantablet_cadUrl", tabletURL)
 	local comId = convar:match("comid=(%w+)")
-	if comId ~= "" then
-		SetModuleUrl("cad", GetConvar("sonorantablet_cadUrl", 'https://sonorancad.com/login?comid='..comId), true)
+	if comId ~= "" and comId ~= nil then
+		SetModuleUrl("cad", GetConvar("sonorantablet_cadUrl", tabletURL .. 'login?comid='..comId), true)
 	else
-		SetModuleUrl("cad", GetConvar("sonorantablet_cadUrl", 'https://sonorancad.com/'), false)
+		SetModuleUrl("cad", GetConvar("sonorantablet_cadUrl", tabletURL), false)
 	end
 
 	TriggerServerEvent("SonoranCAD::mini:CallSync_S")

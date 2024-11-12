@@ -5,7 +5,4 @@ unzip/
 .git
 stream/*
 !stream/.gitkeep
-plugins/*
-!plugins/template
 npm-shrinkwrap.json
-package.json

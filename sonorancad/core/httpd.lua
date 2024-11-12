@@ -503,6 +503,6 @@ AddEventHandler('SonoranCAD::pushevents:shim', function(chunk)
 	end
 end)
 
-AddPluginFilePath('images', function(path)
+-- AddPluginFilePath('images', function(path)
 
-end)
+-- end)

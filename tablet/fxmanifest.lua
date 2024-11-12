@@ -17,6 +17,5 @@ files {
     'html/index.html',
     'html/style.css',
     'html/reset.css',
-    'html/config.js',
     "html/script.js"
 }
