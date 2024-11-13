@@ -53,7 +53,7 @@ function RunAutoUpdater(manualRun)
         os.remove(GetResourcePath("sonoran_updatehelper").."/run.lock")
     end
     local versionFile = Config.autoUpdateUrl
-    if versionFile == "https://raw.githubusercontent.com/Sonoran-Software/SonoranCADLuaIntegration/%7Bbranch%7D/sonorancad/version.json" then
+    if versionFile == "https://raw.githubusercontent.com/Sonoran-Software/SonoranCADLuaIntegration/{branch}/sonorancad/version.json" then
         errorLog('It seems like you might be running a v2.X.X core configuration file. Please update from the config.CHANGEME.json file or reinstall the resource. Install guide: https://sonoran.link/v3')
         versionFile = "https://raw.githubusercontent.com/Sonoran-Software/SonoranCADFiveM/{branch}/sonorancad/version.json"
     end
