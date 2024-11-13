@@ -88,17 +88,26 @@ function getServerVersion()
 end
 
 function compareVersions(version1, version2)
-    _, _, v1, v2, v3 = string.find( version1, "(%d+)%.(%d+)%.(%d+)" )
-    _, _, r1, r2, r3 = string.find( version2, "(%d+)%.(%d+)%.(%d+)" )
-    if r3 == nil then r3 = 0 end
-    if v3 == nil then v3 = 0 end
-    if r2 == nil then r2 = 0 end
-    if v2 == nil then v2 = 0 end
-    if v1 == nil then v1 = 1 end
-    if r1 == nil then r1 = 1 end
-    local parsedVersion2 = r3+(r2*100)+(r1*1000)
-    local parsedVersion1 = v3+(v2*100)+(v1*1000)
-    local tbl = { result = (parsedVersion2 < parsedVersion1), parsedVersion1 = parsedVersion1, parsedVersion2 = parsedVersion2, version1 = version1, version2 = version2 }
+    local v1, v2, v3 = version1:match("(%d+)%.(%d*)%.?(%d*)")
+    local r1, r2, r3 = version2:match("(%d+)%.(%d*)%.?(%d*)")
+
+    -- Convert to numbers and default to 0 for minor and patch if missing
+    v1, v2, v3 = tonumber(v1) or 0, tonumber(v2) or 0, tonumber(v3) or 0
+    r1, r2, r3 = tonumber(r1) or 0, tonumber(r2) or 0, tonumber(r3) or 0
+
+    -- Calculate parsed versions with proper weights
+    local parsedVersion1 = v1 * 10000 + v2 * 100 + v3
+    local parsedVersion2 = r1 * 10000 + r2 * 100 + r3
+
+    -- Create debug log table
+    local tbl = {
+        result = (parsedVersion2 < parsedVersion1),
+        parsedVersion1 = parsedVersion1,
+        parsedVersion2 = parsedVersion2,
+        version1 = version1,
+        version2 = version2
+    }
     debugLog(json.encode(tbl))
+
     return tbl
 end

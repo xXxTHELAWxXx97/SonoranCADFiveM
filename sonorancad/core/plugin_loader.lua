@@ -16,6 +16,38 @@ local function LoadVersionFile()
     end
 end
 
+function CheckForPluginUpdate(name)
+    local plugin = Config.plugins[name]
+    plugin.check_url = 'https://raw.githubusercontent.com/Sonoran-Software/SonoranCADFiveM/refs/heads/master/sonorancad/version.json'
+    if plugin == nil then
+        errorLog(("Submodule %s not found."):format(name))
+        return
+    elseif plugin.enabled == false then
+        return
+    elseif plugin.check_url == nil or plugin.check_url == "" then
+        debugLog(("Submodule %s does not have check_url set. Is it configured correctly?"):format(name))
+        return
+    end
+    PerformHttpRequestS(plugin.check_url, function(code, data, headers)
+        if code == 200 then
+            local remote = json.decode(data)
+            if remote == nil then
+                warnLog(("Failed to get a valid response for %s. Skipping."):format(k))
+                debugLog(("Raw output for %s: %s"):format(k, data))
+            elseif remote.submoduleConfigs[name].version ~= nil and plugin.configVersion ~= nil then
+                local configCompare = compareVersions(remote.submoduleConfigs[name].version, plugin.configVersion)
+                if configCompare.result and not Config.debugMode then
+                    errorLog(("Submodule Updater: %s has a new configuration version. You should look at the template configuration file (%s_config.dist.lua) and update your configuration before using this submodule."):format(name, name))
+                    Config.plugins[name].enabled = false
+                    Config.plugins[name].disableReason = "outdated config file"
+                end
+            end
+        else
+            warnLog(("Failed to check submodule config updates for %s: %s %s"):format(name, code, data))
+        end
+    end, "GET")
+end
+
 CreateThread(function()
     Wait(5000)
     while Config.apiVersion == -1 do Wait(10) end
@@ -31,8 +63,8 @@ CreateThread(function()
             goto skip
         end
         local versionFile = json.decode(vfile)
-        if versionFile.requiresPlugins ~= nil then
-            for _, plugin in pairs(versionFile.requiresPlugins) do
+        if versionFile.submoduleConfigs[k].requiresPlugins ~= nil then
+            for _, plugin in pairs(versionFile.submoduleConfigs[k].requiresPlugins) do
                 local isCritical = plugin.critical
                 if isCritical then
                     logError("PLUGIN_DEPENDENCY_ERROR", getErrorText("PLUGIN_DEPENDENCY_ERROR"):format(k, plugin.name))
@@ -43,6 +75,7 @@ CreateThread(function()
                 end
             end
         end
+        CheckForPluginUpdate(k)
     end
     ::skip::
     local pluginList = {}
