@@ -38,7 +38,7 @@ local function doUpdate(latest)
             warnLog(("Failed to download from %s: %s %s"):format(releaseUrl, code, data))
         end
     end, "GET")
-    
+
 end
 
 function RunAutoUpdater(manualRun)
@@ -53,6 +53,10 @@ function RunAutoUpdater(manualRun)
         os.remove(GetResourcePath("sonoran_updatehelper").."/run.lock")
     end
     local versionFile = Config.autoUpdateUrl
+    if versionFile == "https://raw.githubusercontent.com/Sonoran-Software/SonoranCADLuaIntegration/%7Bbranch%7D/sonorancad/version.json" then
+        errorLog('It seems like you might be running a v2.X.X core configuration file. Please update from the config.CHANGEME.json file or reinstall the resource. Install guide: https://sonoran.link/v3')
+        versionFile = "https://raw.githubusercontent.com/Sonoran-Software/SonoranCADFiveM/{branch}/sonorancad/version.json"
+    end
     if versionFile == nil then
         versionFile = "https://raw.githubusercontent.com/Sonoran-Software/SonoranCADFiveM/{branch}/sonorancad/version.json"
     end
