@@ -101,7 +101,7 @@ CreateThread(function()
         table.insert(disableFormatted, ("%s (%s)"):format(name, reason))
     end
     if #disableFormatted > 0 then
-        warnLog(("Disabled Submodules: %s"):format(
+        infoLog(("Disabled Submodules: %s"):format(
                     table.concat(disableFormatted, ", ")))
     end
 end)
