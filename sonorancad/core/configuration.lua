@@ -85,7 +85,7 @@ Config.GetPluginConfig = function(pluginName)
                                              '_config.lua')
         if not correctConfig then
             infoLog(
-                ('Plugin %s only has the default configurations file (%s_config.dist.lua)... Attempting to rename config to: %s_config.lua'):format(
+                ('Submodule %s only has the default configurations file (%s_config.dist.lua)... Attempting to rename config to: %s_config.lua'):format(
                     pluginName, pluginName, pluginName))
             if not CopyFile(GetResourcePath(GetCurrentResourceName()) ..
                                 '/configuration/' .. pluginName ..
@@ -109,7 +109,7 @@ Config.GetPluginConfig = function(pluginName)
         end
         if not correctConfig then
             warnLog(
-                ('Plugin %s is missing critical configuration. Please check our plugin install guide at https://info.sonorancad.com/integration-submodules/integration-submodules/plugin-installation for steps to properly install.'):format(
+                ('Submodule %s is missing critical configuration. Please check our submodule install guide at https://info.sonorancad.com/integration-plugins/in-game-integration/fivem-installation/submodule-configuration#activating-a-submodule for steps to properly install.'):format(
                     pluginName))
             Config.plugins[pluginName] = {
                 enabled = false,
@@ -131,7 +131,7 @@ Config.GetPluginConfig = function(pluginName)
                 -- Execute and capture the returned config table
                 local success, res = pcall(loadedPlugin)
                 if not success then
-                    errorLog(('Plugin %s failed to load due to error: %s'):format(pluginName, res))
+                    errorLog(('Submodule %s failed to load due to error: %s'):format(pluginName, res))
                     Config.plugins[pluginName] = {
                         enabled = false,
                         disableReason = 'Failed to load'

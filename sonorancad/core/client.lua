@@ -149,7 +149,7 @@ Config.LoadPlugin = function(pluginName, cb)
                                              '_config.lua')
         if not correctConfig then
             warnLog(
-                ('Plugin %s is missing critical configuration. Please check our plugin install guide at https://info.sonorancad.com/integration-submodules/integration-submodules/plugin-installation for steps to properly install.'):format(
+                ('Submodule %s is missing critical configuration. Please check our submodule install guide at https://info.sonorancad.com/integration-plugins/in-game-integration/fivem-installation/submodule-configuration#activating-a-submodule for steps to properly install.'):format(
                     pluginName))
             Config.plugins[pluginName] = {
                 enabled = false,
@@ -174,7 +174,7 @@ Config.LoadPlugin = function(pluginName, cb)
                 local success, res = pcall(loadedPlugin)
                 if not success then
                     errorLog(
-                        ('Plugin %s failed to load due to error: %s'):format(
+                        ('Submodule %s failed to load due to error: %s'):format(
                             pluginName, res))
                     Config.plugins[pluginName] = {
                         enabled = false,
@@ -188,7 +188,7 @@ Config.LoadPlugin = function(pluginName, cb)
                 else
                     -- Handle case where config is not available
                     errorLog(
-                        ('Plugin %s did not define a valid config table.'):format(
+                        ('Submodule %s did not define a valid config table.'):format(
                             pluginName))
                     Config.plugins[pluginName] = {
                         enabled = false,
@@ -208,7 +208,7 @@ Config.LoadPlugin = function(pluginName, cb)
                     Config.plugins[pluginName].disableReason = 'Disabled'
                 end
             else
-                errorLog(('Plugin %s failed to load due to error: %s'):format(
+                errorLog(('Submodule %s failed to load due to error: %s'):format(
                              pluginName, pluginError))
                 Config.plugins[pluginName] = {
                     enabled = false,

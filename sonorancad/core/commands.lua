@@ -48,11 +48,11 @@ function dumpInfo()
 SonoranCAD
 Version: %s - Latest: %s
 FXS Version: %s
-Available Plugins
+Available Submodules
 %s
-Loaded Plugins
+Loaded Submodules
 %s
-Disabled Plugins
+Disabled Submodules
 %s
 Relevant Variables
 %s

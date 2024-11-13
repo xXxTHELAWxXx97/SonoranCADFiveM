@@ -39,7 +39,7 @@ CreateThread(function()
                     Config.plugins[k].enabled = false
                     Config.plugins[k].disableReason = ("Missing dependency %s"):format(plugin.name)
                 elseif plugin.name ~= "esxsupport" then
-                    warnLog(("[plugin loader] Plugin %s requires %s, but it is not installed. Some features may not work properly."):format(k, plugin.name))
+                    warnLog(("[submodule loader] submodule %s requires %s, but it is not installed. Some features may not work properly."):format(k, plugin.name))
                 end
             end
         end
@@ -60,13 +60,13 @@ CreateThread(function()
             disabledPlugins[name] = v.disableReason
         end
     end
-    infoLog(("Available Plugins: %s"):format(table.concat(pluginList, ", ")))
-    infoLog(("Loaded Plugins: %s"):format(table.concat(loadedPlugins, ", ")))
+    infoLog(("Available Submodules: %s"):format(table.concat(pluginList, ", ")))
+    infoLog(("Loaded Submodules: %s"):format(table.concat(loadedPlugins, ", ")))
     for name, reason in pairs(disabledPlugins) do
         table.insert(disableFormatted, ("%s (%s)"):format(name, reason))
     end
     if #disableFormatted > 0 then
-        warnLog(("Disabled Plugins: %s"):format(
+        warnLog(("Disabled Submodules: %s"):format(
                     table.concat(disableFormatted, ", ")))
     end
 end)
