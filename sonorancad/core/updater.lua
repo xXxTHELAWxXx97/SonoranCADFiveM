@@ -25,7 +25,7 @@ end)
 
 local function doUpdate(latest)
     -- best way to do this...
-    local releaseUrl = ("https://github.com/Sonoran-Software/SonoranCADLuaIntegration/releases/download/v%s/sonorancad-%s.zip"):format(latest, latest)
+    local releaseUrl = ("https://github.com/Sonoran-Software/SonoranCADFiveM/releases/download/v%s/sonorancad-%s.zip"):format(latest, latest)
     PerformHttpRequest(releaseUrl, function(code, data, headers)
         if code == 200 then
             local savePath = GetResourcePath(GetCurrentResourceName()).."/update.zip"
@@ -54,7 +54,7 @@ function RunAutoUpdater(manualRun)
     end
     local versionFile = Config.autoUpdateUrl
     if versionFile == nil then
-        versionFile = "https://raw.githubusercontent.com/Sonoran-Software/SonoranCADLuaIntegration/{branch}/sonorancad/version.json"
+        versionFile = "https://raw.githubusercontent.com/Sonoran-Software/SonoranCADFiveM/{branch}/sonorancad/version.json"
     end
     versionFile = string.gsub(versionFile, "{branch}", Config.updateBranch)
     local myVersion = GetResourceMetadata(GetCurrentResourceName(), "version", 0)
@@ -74,7 +74,7 @@ function RunAutoUpdater(manualRun)
                         print("^3|                        ^5SonoranCAD Update Available                        ^3|")
                         print("^3|                             ^8Current : " .. compare.version2 .. "                               ^3|")
                         print("^3|                             ^2Latest  : " .. compare.version1 .. "                               ^3|")
-                        print("^3| Download at: ^4https://github.com/Sonoran-Software/SonoranCADLuaIntegration ^3|")
+                        print("^3| Download at: ^4https://github.com/Sonoran-Software/SonoranCADFiveM          ^3|")
                         print("^3|===========================================================================|^7")
                         if Config.allowAutoUpdate == nil then
                             warnLog("You have not configured the automatic updater. Please set allowAutoUpdate in config.json to allow updates.")
