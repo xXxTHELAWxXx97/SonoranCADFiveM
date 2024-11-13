@@ -66,12 +66,14 @@ CreateThread(function()
         if versionFile.submoduleConfigs[k].requiresPlugins ~= nil then
             for _, plugin in pairs(versionFile.submoduleConfigs[k].requiresPlugins) do
                 local isCritical = plugin.critical
-                if isCritical then
-                    logError("PLUGIN_DEPENDENCY_ERROR", getErrorText("PLUGIN_DEPENDENCY_ERROR"):format(k, plugin.name))
-                    Config.plugins[k].enabled = false
-                    Config.plugins[k].disableReason = ("Missing dependency %s"):format(plugin.name)
-                elseif plugin.name ~= "esxsupport" then
-                    warnLog(("[submodule loader] submodule %s requires %s, but it is not installed. Some features may not work properly."):format(k, plugin.name))
+                if Config.plugins[v] == nil or not Config.plugins[v].enabled then
+                    if isCritical then
+                        logError("PLUGIN_DEPENDENCY_ERROR", getErrorText("PLUGIN_DEPENDENCY_ERROR"):format(k, plugin.name))
+                        Config.plugins[k].enabled = false
+                        Config.plugins[k].disableReason = ("Missing dependency %s"):format(plugin.name)
+                    elseif plugin.name ~= "esxsupport" then
+                        warnLog(("[submodule loader] submodule %s requires %s, but it is not installed. Some features may not work properly."):format(k, plugin.name))
+                    end
                 end
             end
         end
