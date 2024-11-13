@@ -10,6 +10,7 @@ local config = {
     enabled = false,
     pluginName = "ts3integration", -- name your plugin here
     pluginAuthor = "SonoranCAD", -- author
+    configVersion = "1.0",
     requiresPlugins = {}, -- required plugins for this plugin to work, separated by commas
 }
 

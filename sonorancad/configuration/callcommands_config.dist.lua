@@ -10,7 +10,6 @@ local config = {
     pluginName = "callcommands", -- name your plugin here
     pluginAuthor = "SonoranCAD", -- author
     configVersion = "2.1",
-    requiresPlugins = {{name = "locations", critical = true}},
     -- put your configuration options below
     callTypes = {
         {

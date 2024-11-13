@@ -7,6 +7,7 @@ local config = {
     enabled = false,
     pluginName = "lookups", -- name your plugin here
     pluginAuthor = "SonoranCAD", -- author
+    configVersion = "1.0",
     requiresPlugins = {}, -- required plugins for this plugin to work, separated by commas
 
     -- put your configuration options below

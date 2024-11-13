@@ -9,6 +9,7 @@ local config = {
     enabled = false,
     pluginName = "locations", -- name your plugin here
     pluginAuthor = "SonoranCAD", -- author
+    pluginVersion = "1.0", -- version of your plugin
     requiresPlugins = {},
     -- put your configuration options below
     checkTime = 5000, -- how frequently to send locations to the server

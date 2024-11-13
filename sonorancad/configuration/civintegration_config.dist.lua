@@ -11,10 +11,8 @@ local config = {
     configVersion = "1.1",
     pluginName = "civintegration", -- name your plugin here
     pluginAuthor = "SonoranCAD", -- author
-    requiresPlugins = {} -- required plugins for this plugin to work, separated by commas
-
     -- time to cache characters in seconds
-    ,cacheTime = 3600 -- one hour
+    cacheTime = 3600 -- one hour
 
     -- allow civilians to use /setid and set a custom ID (for characters not registered in the CAD)
     ,allowCustomIds = true

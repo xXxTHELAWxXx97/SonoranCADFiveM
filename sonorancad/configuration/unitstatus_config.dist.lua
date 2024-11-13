@@ -9,6 +9,7 @@ local config = {
     enabled = false,
     pluginName = "unitstatus", -- name your plugin here
     pluginAuthor = "SonoranCAD", -- author
+    configVersion = "1.0",
     requiresPlugins = {}, -- required plugins for this plugin to work, separated by commas
     setStatusCommand = "setstatus", -- user command for setting their own status, leave blank to not use
     -- put your configuration options below
