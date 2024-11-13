@@ -66,7 +66,7 @@ CreateThread(function()
         if versionFile.submoduleConfigs[k].requiresPlugins ~= nil then
             for _, plugin in pairs(versionFile.submoduleConfigs[k].requiresPlugins) do
                 local isCritical = plugin.critical
-                if Config.plugins[v] == nil or not Config.plugins[v].enabled then
+                if Config.plugins[plugin.name] == nil or not Config.plugins[plugin.name].enabled then
                     if isCritical then
                         logError("PLUGIN_DEPENDENCY_ERROR", getErrorText("PLUGIN_DEPENDENCY_ERROR"):format(k, plugin.name))
                         Config.plugins[k].enabled = false
