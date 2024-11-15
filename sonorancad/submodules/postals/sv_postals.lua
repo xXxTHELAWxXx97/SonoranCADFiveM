@@ -31,7 +31,7 @@ CreateThread(function()
 					postalFile = LoadResourceFile(pluginConfig.nearestPostalResourceName, GetResourceMetadata(pluginConfig.nearestPostalResourceName, 'postal_file'))
 				end
 			elseif pluginConfig.mode and pluginConfig.mode == 'file' then
-				local postalFile = LoadResourceFile(GetCurrentResourceName(), ('/submodules/postals/%s'):format(pluginConfig.customPostalCodesFile))
+				postalFile = LoadResourceFile(GetCurrentResourceName(), ('/submodules/postals/%s'):format(pluginConfig.customPostalCodesFile))
 				if postalFile == nil then
 					errorLog(('[postals] The configured postals file (%s) was not found. Please check it.'):format(pluginConfig.customPostalCodesFile))
 					shouldStop = true
