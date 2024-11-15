@@ -498,7 +498,7 @@ CreateThread(function()
         counter = counter + 1
         if counter % 60 == 0 then
             warnLog(
-                'Still waiting for web_baseUrl convar to be set...bodycam will not work until this is set.')
+                'Still waiting for web_baseUrl convar to be set...bodycam will not work until this is set.'
             )
         end
     end
