@@ -355,11 +355,6 @@ end
 
 if Config.updateBranch == nil then Config.updateBranch = 'master' end
 
-if GetConvar('web_baseUrl', '') ~= '' then
-    Config.proxyUrl = ('https://%s/sonorancad/'):format(
-                          GetConvar('web_baseUrl', ''))
-end
-
 RegisterNetEvent('SonoranCAD::core:sendClientConfig')
 AddEventHandler('SonoranCAD::core:sendClientConfig', function()
     local config = {
@@ -490,45 +485,35 @@ CreateThread(function()
         warnLog(
             'The livemap plugin is no longer being used due to the map being native to the CAD. You can remove this plugin.')
     end
+end)
 
-    local attempts = 0
-    local max_retries = 20
-    while attempts <= max_retries do
+CreateThread(function()
+    -- attempt to fetch web_baseUrl
+    local baseUrl = ''
+    local counter = 0
+    while baseUrl == '' do
         Wait(1000)
-        attempts = attempts + 1
-        if attempts == max_retries then
-            errorLog(
-                'Failed to initialize bodycam due to missing web_baseUrl convar.')
-        end
-        if GetConvar('web_baseUrl', '') ~= '' then
-            TriggerClientEvent('SonoranCAD::Core::InitBodycam', -1)
-            Config.proxyUrl = ('https://%s/sonorancad/'):format(GetConvar(
-                                                                    'web_baseUrl',
-                                                                    ''))
-            break
+        baseUrl = GetConvar('web_baseUrl', '')
+        -- every 60 seconds, log a warning
+        counter = counter + 1
+        if counter % 60 == 0 then
+            warnLog(
+                'Still waiting for web_baseUrl convar to be set...bodycam will not work until this is set.'
+            )
         end
     end
+    Config.proxyUrl = ('https://%s/sonorancad/'):format(GetConvar('web_baseUrl',''))
+    debugLog(('Set proxyUrl to %s'):format(Config.proxyUrl))
+    TriggerClientEvent('SonoranCAD::Core::InitBodycam', -1, 1)
 end)
 
 RegisterNetEvent('SonoranCAD::Core::RequestBodycam', function()
-    local attempts = 0
-    local max_retries = 20
-    local source = source
-    if Config.proxyUrl ~= '' then
-        TriggerClientEvent('SonoranCAD::Core::InitBodycam', source)
-    else
-        while attempts <= max_retries do
-            Wait(1000)
-            attempts = attempts + 1
-            if attempts == max_retries then
-                errorLog(
-                    'Failed to initialize bodycam due to missing web_baseUrl convar.')
-            end
-            if GetConvar('web_baseUrl', '') ~= '' then
-                TriggerClientEvent('SonoranCAD::Core::InitBodycam', source)
-                break
-            end
-        end
+    if not Config.proxyUrl or Config.proxyUrl == '' then
+        -- tell client we're not ready
+        TriggerClientEvent('SonoranCAD::Core::InitBodycam', source, 0)
+    else 
+        -- tell client we're ready
+        TriggerClientEvent('SonoranCAD::Core::InitBodycam', source, 1)
     end
 end)
 

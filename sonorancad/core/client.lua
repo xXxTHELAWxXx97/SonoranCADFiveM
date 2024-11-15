@@ -260,7 +260,16 @@ RegisterNetEvent('SonoranCAD::core::ScreenshotOff', function()
     end
 end)
 
-RegisterNetEvent('SonoranCAD::Core::InitBodycam', function()
+RegisterNetEvent('SonoranCAD::Core::InitBodycam', function(isReady)
+    if isReady == 0 then
+        CreateThread(function() 
+            -- still waiting, request again in 10s
+            debugLog('Bodycam not ready, retrying in 10s')
+            Wait(10000)
+            TriggerServerEvent('SonoranCAD::Core::RequestBodycam')
+        end)
+        return
+    end
     if Config.bodycamEnabled then
         print('Bodycam init')
         -- Command to toggle bodycam on and off
