@@ -153,6 +153,7 @@ if pluginConfig.enabled then
             local charData = {}
             local vehData = {}
             local boloData = {}
+            local warrantData = {}
             if result ~= nil then
                 for k, v in pairs(result) do
                     for _, record in pairs(v.sections) do
@@ -188,7 +189,6 @@ if pluginConfig.enabled then
                                         end
                                     end
                                     table.insert(charData, char)
-
                                 elseif field.uid == "plate" then
                                     debugLog("found vehicle info")
                                     local veh = {}
@@ -223,19 +223,48 @@ if pluginConfig.enabled then
                                     else
                                         boloData = {"BOLO"}
                                     end
-                                else
-                                    boloData = {"BOLO"}
                                 end
+                            end
+                            if boloActive and (boloData == nil or #boloData == 0) then
+                                boloData = {"BOLO"}
                             end
                             if not boloActive then
                                 debugLog("BOLO inactive, mark as such")
                                 boloData = {}
                             end
+                        elseif v.type == 2 then
+                            local warrantActive = true
+                            for _, section in pairs(v.sections) do
+                                for _, field in pairs(section.fields) do
+                                    if field.uid == "status" then
+                                        debugLog(("Found Warrant status field %s with value %s"):format(field.label, field.value))
+                                        if field.value == "0" then
+                                            warrantActive = true
+                                        elseif field.value == "1" then
+                                            warrantActive = false
+                                        end
+                                    end
+                                end
+                                if section.category == 1 then-- flags
+                                    if section.fields[1].data ~= nil and section.fields[1].data.flags ~= nil then
+                                        warrantData = section.fields[1].data.flags
+                                    else
+                                        warrantData = {"Warrant"}
+                                    end
+                                end
+                            end
+                            if warrantActive and (warrantData == nil or #warrantData == 0) then
+                                warrantData = {"Warrant"}
+                            end
+                            if not warrantActive then
+                                debugLog("Warrant inactive, mark as such")
+                                warrantData = {}
+                            end
                         end
                     end
                 end
             end
-            callback(regData, vehData, charData, boloData)
+            callback(regData, vehData, charData, boloData, warrantData)
         end, autoLookup)
     end
 

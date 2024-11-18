@@ -39,7 +39,7 @@ if pluginConfig.enabled then
 		local ids = GetIdentifiers(source)
 		plate = plate:match('^%s*(.-)%s*$')
 		wraithLastPlates.locked = {cam = cam, plate = plate, index = index, vehicle = cam.vehicle}
-		cadGetInformation(plate, function(regData, vehData, charData, boloData)
+		cadGetInformation(plate, function(regData, vehData, charData, boloData, warrantData)
 			if cam == 'front' then
 				camCapitalized = 'Front'
 			elseif cam == 'rear' then
@@ -47,9 +47,9 @@ if pluginConfig.enabled then
 			end
 			if returnEvent ~= nil then
 				if cbType == 'client' then
-					TriggerClientEvent(returnEvent, source, {['regData'] = regData, ['vehData'] = vehData, ['charData'] = charData, ['boloData'] = boloData, ['plate'] = plate, ['cam'] = cam, ['index'] = index})
+					TriggerClientEvent(returnEvent, source, {['regData'] = regData, ['vehData'] = vehData, ['charData'] = charData, ['boloData'] = boloData, ['warrantData'] = warrantData, ['plate'] = plate, ['cam'] = cam, ['index'] = index})
 				elseif cbType == 'server' then
-					TriggerServerEvent(returnEvent, source, {['regData'] = regData, ['vehData'] = vehData, ['charData'] = charData, ['boloData'] = boloData, ['plate'] = plate, ['cam'] = cam, ['index'] = index})
+					TriggerServerEvent(returnEvent, source, {['regData'] = regData, ['vehData'] = vehData, ['charData'] = charData, ['boloData'] = boloData, ['warrantData'] = warrantData, ['plate'] = plate, ['cam'] = cam, ['index'] = index})
 				else
 					warnLog('The provided cbType for wk:onPlateLocked was invalid!')
 				end
@@ -99,6 +99,11 @@ if pluginConfig.enabled then
 					TriggerClientEvent('pNotify:SendNotification', source, {text = ('<b style=\'color:red\'>BOLO ALERT!<br/>Plate: %s<br/>Flags: %s'):format(plate:upper(), flags), type = 'error', queue = 'bolo',
 						timeout = 20000, layout = 'centerLeft'})
 				end
+				if #warrantData > 0 then
+					local warrants = table.concat(warrantData, ',')
+					TriggerClientEvent('pNotify:SendNotification', source, {text = ('<b style=\'color:red\'>WARRANT ALERT!<br/>Plate: %s<br/>Warrants: %s'):format(plate:upper(), warrants), type = 'error', queue = 'warrant',
+						timeout = 20000, layout = 'centerLeft'})
+				end
 			else
 				TriggerClientEvent('pNotify:SendNotification', source,
 				                   {text = '<b style=\'color:yellow\'>' .. camCapitalized .. ' ALPR</b><br/>Plate: ' .. plate:upper() .. '<br/>Status: Not Registered', type = 'error', queue = 'alpr',
@@ -124,12 +129,12 @@ if pluginConfig.enabled then
 		plate = plate:match('^%s*(.-)%s*$')
 		wraithLastPlates.scanned = {cam = cam, plate = plate, index = index, vehicle = cam.vehicle}
 		TriggerEvent('SonoranCAD::wraithv2:PlateScanned', source, reg, cam, plate, index)
-		cadGetInformation(plate, function(regData, vehData, charData, boloData)
+		cadGetInformation(plate, function(regData, vehData, charData, boloData, warrantData)
 			if returnEvent ~= nil then
 				if cbType == 'client' then
-					TriggerClientEvent(returnEvent, source, {['regData'] = regData, ['vehData'] = vehData, ['charData'] = charData, ['boloData'] = boloData, ['plate'] = plate, ['cam'] = cam, ['index'] = index})
+					TriggerClientEvent(returnEvent, source, {['regData'] = regData, ['vehData'] = vehData, ['charData'] = charData, ['boloData'] = boloData, ['warrantData'] = warrantData, ['plate'] = plate, ['cam'] = cam, ['index'] = index})
 				elseif cbType == 'server' then
-					TriggerServerEvent(returnEvent, source, {['regData'] = regData, ['vehData'] = vehData, ['charData'] = charData, ['boloData'] = boloData, ['plate'] = plate, ['cam'] = cam, ['index'] = index})
+					TriggerServerEvent(returnEvent, source, {['regData'] = regData, ['vehData'] = vehData, ['charData'] = charData, ['boloData'] = boloData, ['warrantData'] = warrantData, ['plate'] = plate, ['cam'] = cam, ['index'] = index})
 				else
 					warnLog('The provided cbType for wk:onPlateLocked was invalid!')
 				end
@@ -182,6 +187,12 @@ if pluginConfig.enabled then
 					TriggerClientEvent('pNotify:SendNotification', source, {text = ('<b style=\'color:red\'>BOLO ALERT!<br/>Plate: %s<br/>Flags: %s'):format(plate:upper(), flags), type = 'error', queue = 'bolo',
 						timeout = 20000, layout = 'centerLeft'})
 					TriggerEvent('SonoranCAD::wraithv2:BoloAlert', plate, flags)
+				end
+				if #warrantData > 0 then
+					local warrants = table.concat(warrantData, ',')
+					TriggerClientEvent('pNotify:SendNotification', source, {text = ('<b style=\'color:red\'>WARRANT ALERT!<br/>Plate: %s<br/>Flags: %s'):format(plate:upper(), warrants), type = 'error', queue = 'warrant',
+						timeout = 20000, layout = 'centerLeft'})
+					TriggerEvent('SonoranCAD::wraithv2:WarrantAlert', plate, warrants)
 				end
 			else
 				if pluginConfig.alertNoRegistration then
