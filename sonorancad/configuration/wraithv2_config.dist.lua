@@ -24,6 +24,12 @@ local config = {
     flagOnStatuses = {"STOLEN", "EXPIRED", "PENDING", "SUSPENDED"}
     -- Vehicle classes that will NOT get ran through CAD | Classes: https://docs.fivem.net/natives/?_0x29439776AAA00A62
     ,vehTypeFilter = { 13, 14, 15, 16, 21, 22 }
+    ,notificationTimers = {
+        validReg = 30000, -- 30 seconds for valid registration
+        warrant = 20000, -- 20 seconds for warrant
+        bolo = 20000, -- 20 seconds for bolo
+        noReg = 5000, -- 5 seconds for no registration
+    }
 }
 
 if config.enabled then Config.RegisterPluginConfig(config.pluginName, config) end

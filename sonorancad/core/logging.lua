@@ -25,7 +25,8 @@ local ErrorCodes = {
     ['POSTAL_CUSTOM_RESOURCE_FILE_ERROR'] = "Failed to locate postal file from resource %s! Please ensure that it is defined in %s's fxmanifest.lua as 'postal_file'",
     ['IDCARD_RESOURCE_NOT_STARTED'] = "The sonoran_idcard resource seems to be stopped, this resource is required for the ID card UI to work. Attempting to start the resource. Please add it to your server.cfg to run by default.",
     ['IDCARD_RESOURCE_MISSING'] = "The sonoran_idcard resource seems to be missing, this resource is required for the the ID card UI to work. Please ensure the resource name is exactly: 'sonoran_idcard' or install it from our GitHub: https://github.com/Sonoran-Software/id_card_ui",
-    ['IDCARD_RESOURCE_BAD_STATE'] = "The sonoran_idcard resource is in a bad state. Please check it."
+    ['IDCARD_RESOURCE_BAD_STATE'] = "The sonoran_idcard resource is in a bad state. Please check it.",
+    ['INCORRECT_WKWARS2X_VERSION'] = "It appears that you are using an incorrect version of the resource wk_wars2x. Please ensure you install the version from our GitHub: https://github.com/Sonoran-Software/wk_wars2x. The version you are using is not compatible with SonoranCAD.",
 }
 
 function getErrorText(err)

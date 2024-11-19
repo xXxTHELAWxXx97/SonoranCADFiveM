@@ -6,9 +6,8 @@ CreateThread(function()
                              function(soundType)
                 SendNUIMessage({
                     type = 'playSound',
-                    transactionFile = GetResourcePath(GetCurrentResourceName()) ..
-                        '/submodules/wraithv2/sfx/' .. soundType .. '.mp3',
-                    transactionVolume = 0.3
+                    transactionFile = '../../submodules/wraithv2/sfx/' .. soundType .. '.mp3',
+                    transactionVolume = 1.0
                 })
             end)
         end
