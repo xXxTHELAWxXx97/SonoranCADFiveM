@@ -9,7 +9,7 @@ local config = {
     enabled = false,
     pluginName = "wraithv2", -- name your plugin here
     pluginAuthor = "SonoranCAD", -- author
-    configVersion = "1.5",
+    configVersion = "1.6",
     requiresPlugins = {{name = "lookups", critical = true}}, -- required plugins for this plugin to work, separated by commas
     -- use vehicle registration expirations, or not
     useExpires = true,
