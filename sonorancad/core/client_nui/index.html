@@ -46,7 +46,7 @@
 						audioPlayer.pause();
 					}
 					audioPlayer = new Howl({
-						src: ["./sounds/" + event.data.transactionFile + ".mp3"],
+						src: [event.data.transactionFile],
 					});
 					audioPlayer.volume(event.data.transactionVolume);
 					audioPlayer.play();

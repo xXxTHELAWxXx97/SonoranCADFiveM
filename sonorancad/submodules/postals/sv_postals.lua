@@ -18,27 +18,29 @@ CreateThread(function()
 			if pluginConfig.mode and pluginConfig.mode == 'resource' then
 				if state ~= 'started' then
 					if state == 'missing' then
-						errorLog(('[postals] The configured postals resource (%s) does not exist. Please check the name.'):format(pluginConfig.nearestPostalResourceName))
+						logError('POSTAL_RESOURCE_MISSING', getErrorText('POSTAL_RESOURCE_MISSING'):format(pluginConfig.nearestPostalResourceName))
 						shouldStop = true
 					elseif state == 'stopped' then
-						warnLog(('[postals] The postals resource (%s) is not started. Please ensure it\'s started before clients conntect. This is only a warning. State: %s'):format(
-										pluginConfig.nearestPostalResourceName, state))
+						logError('POSTAL_RESOURCE_STOPPED', getErrorText('POSTAL_RESOURCE_STOPPED'):format(pluginConfig.nearestPostalResourceName, state))
 					else
-						errorLog(('[postals] The configured postals resource (%s) is in a bad state (%s). Please check it.'):format(pluginConfig.nearestPostalResourceName, state))
+						logError('POSTAL_RESOURCE_BAD_STATE', getErrorText('POSTAL_RESOURCE_BAD_STATE'):format(pluginConfig.nearestPostalResourceName, state))
 						shouldStop = true
 					end
 				else
 					postalFile = LoadResourceFile(pluginConfig.nearestPostalResourceName, GetResourceMetadata(pluginConfig.nearestPostalResourceName, 'postal_file'))
+					if postalFile == nil then
+						logError('POSTAL_CUSTOM_RESOURCE_FILE_ERROR', getErrorText('POSTAL_CUSTOM_RESOURCE_FILE_ERROR'):format(pluginConfig.nearestPostalResourceName, pluginConfig.nearestPostalResourceName))
+					end
 				end
 			elseif pluginConfig.mode and pluginConfig.mode == 'file' then
 				postalFile = LoadResourceFile(GetCurrentResourceName(), ('/submodules/postals/%s'):format(pluginConfig.customPostalCodesFile))
 				if postalFile == nil then
-					errorLog(('[postals] The configured postals file (%s) was not found. Please check it.'):format(pluginConfig.customPostalCodesFile))
+					logError('CUSTOM_POSTALS_FILE_NOT_FOUND', geterrorText('CUSTOM_POSTALS_FILE_NOT_FOUND'):format(pluginConfig.customPostalCodesFile))
 					shouldStop = true
 				end
 			end
 			if postalFile == nil then
-				errorLog('Failed to open postals file for reading.')
+				logError('POSTAL_FILE_READ_ERROR')
 				shouldStop = true
 			end
 			if shouldStop then

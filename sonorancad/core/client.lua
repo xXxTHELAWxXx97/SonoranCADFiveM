@@ -262,7 +262,7 @@ end)
 
 RegisterNetEvent('SonoranCAD::Core::InitBodycam', function(isReady)
     if isReady == 0 then
-        CreateThread(function() 
+        CreateThread(function()
             -- still waiting, request again in 10s
             debugLog('Bodycam not ready, retrying in 10s')
             Wait(10000)
@@ -414,7 +414,7 @@ CreateThread(function()
             if bodyCamOn then
                 SendNUIMessage({
                     type = 'playSound',
-                    transactionFile = 'beeps',
+                    transactionFile = GetResourcePath(GetCurrentResourceName()) .. '/core/client_nui/sounds/beeps.mp3',
                     transactionVolume = 0.3
                 })
                 Wait(Config.bodycamBeepFrequency)

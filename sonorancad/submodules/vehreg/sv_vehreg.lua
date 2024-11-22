@@ -51,25 +51,25 @@ CreateThread(function()
 						return;
 					else
 						res = json.decode(res)
-						first = res[1].sections[1].fields[1].value;
-						last = res[1].sections[1].fields[2].value;
-						mi = res[1].sections[1].fields[3].value;
-						dob = res[1].sections[1].fields[4].value;
-						age = res[1].sections[1].fields[5].value;
-						sex = res[1].sections[1].fields[6].value;
-						aka = res[1].sections[1].fields[7].value;
-						residence = res[1].sections[1].fields[8].value;
-						zip = res[1].sections[1].fields[9].value;
-						occupation = res[1].sections[1].fields[10].value;
-						height = res[1].sections[1].fields[11].value;
-						weight = res[1].sections[1].fields[12].value;
-						skin = res[1].sections[1].fields[13].value;
-						hair = res[1].sections[1].fields[14].value;
-						eyes = res[1].sections[1].fields[15].value;
-						emergencyContact = res[1].sections[1].fields[16].value;
-						emergencyRelationship = res[1].sections[1].fields[17].value;
-						emergencyContactNumber = res[1].sections[1].fields[18].value;
-						img = res[1].sections[1].fields[1].value;
+						first = res[1].sections[1].fields[1].value or "Unknown"
+						last = res[1].sections[1].fields[2].value or "Unknown"
+						mi = res[1].sections[1].fields[3].value or "Unknown"
+						dob = res[1].sections[1].fields[4].value or "Unknown"
+						age = res[1].sections[1].fields[5].value or "Unknown"
+						sex = res[1].sections[1].fields[6].value or "Unknown"
+						aka = res[1].sections[1].fields[7].value or "Unknown"
+						residence = res[1].sections[1].fields[8].value or "Unknown"
+						zip = res[1].sections[1].fields[9].value or "Unknown"
+						occupation = res[1].sections[1].fields[10].value or "Unknown"
+						height = res[1].sections[1].fields[11].value or "Unknown"
+						weight = res[1].sections[1].fields[12].value or "Unknown"
+						skin = res[1].sections[1].fields[13].value or "Unknown"
+						hair = res[1].sections[1].fields[14].value or "Unknown"
+						eyes = res[1].sections[1].fields[15].value or "Unknown"
+						emergencyContact = res[1].sections[1].fields[16].value or "Unknown"
+						emergencyRelationship = res[1].sections[1].fields[17].value or "Unknown"
+						emergencyContactNumber = res[1].sections[1].fields[18].value or "Unknown"
+						img = res[1].sections[1].fields[19].value or "Unknown"
 					end
 				end)
 				Citizen.Wait(1000)

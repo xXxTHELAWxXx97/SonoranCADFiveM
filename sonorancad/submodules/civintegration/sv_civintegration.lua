@@ -11,7 +11,18 @@
 local pluginConfig = Config.GetPluginConfig("civintegration")
 
 if pluginConfig.enabled then
-
+    if pluginConfig.enableIDCardUI then
+        if GetResourceState('sonoran_idcard') ~= 'started' then
+            if GetResourceState('sonoran_idcard') == 'stopped' then
+                logError('IDCARD_RESOURCE_NOT_STARTED')
+                ExecuteCommand("ensure sonoran_idcard")
+            elseif GetResourceState('sonoran_idcard') == 'missing' then
+                logError('IDCARD_RESOURCE_MISSING')
+            else
+                logError('IDCARD_RESOURCE_BAD_STATE')
+            end
+        end
+    end
     CharacterCache = {}
     CustomCharacterCache = {}
     local CharacterCacheTimers = {}
@@ -123,7 +134,7 @@ if pluginConfig.enabled then
             RegisterCommand("setid", function(source, args, rawCommand)
                 TriggerClientEvent("SonoranCAD::civintegration:SetCustomId", source)
             end)
-        
+
             RegisterCommand("resetid", function(source, args, rawCommand)
                 if CustomCharacterCache[source] ~= nil then
                     CustomCharacterCache[source] = nil
@@ -145,5 +156,5 @@ if pluginConfig.enabled then
         end
     end
 
-    
+
 end
