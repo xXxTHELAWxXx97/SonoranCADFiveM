@@ -40,6 +40,18 @@ function CheckForPluginUpdate(name)
                     errorLog(("Submodule Updater: %s has a new configuration version. You should look at the template configuration file (%s_config.dist.lua) and update your configuration before using this submodule."):format(name, name))
                     Config.plugins[name].enabled = false
                     Config.plugins[name].disableReason = "outdated config file"
+                else
+                    debugLog(("Submodule %s has the same configuration version."):format(name))
+                    local distConfig = LoadResourceFile(GetCurrentResourceName(), ("/configuration/%s_config.dist.lua"):format(name))
+                    local normalConfig = LoadResourceFile(GetCurrentResourceName(), ("/configuration/%s_config.lua"):format(name))
+                    if distConfig and normalConfig then
+                        exports.sonorancad.CreateFolderIfNotExisting("%s/configuration/config-backup"):format(GetResourcePath(GetCurrentResourceName()))
+                        local backupFile = io.open(("%s/configuration/config-backup/%s_config.lua"):format(GetResourcePath(GetCurrentResourceName()), name), "w")
+                        backupFile:write(distConfig)
+                        backupFile:close()
+                        os.remove(("%s/configuration/%s_config.dist.lua"):format(GetResourcePath(GetCurrentResourceName()), name))
+                        debugLog(("Submodule %s configuration file is up to date. Backup saved."):format(name))
+                    end
                 end
             end
         else
