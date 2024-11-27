@@ -6,7 +6,7 @@
     Put all needed configuration in this file.
 ]]
 local config = {
-    enabled = false,
+    enabled = true,
     pluginName = "locations", -- name your plugin here
     pluginAuthor = "SonoranCAD", -- author
     pluginVersion = "1.0", -- version of your plugin

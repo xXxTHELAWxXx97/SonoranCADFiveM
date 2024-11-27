@@ -4,7 +4,7 @@
     Plugin Configuration
 ]]
 local config = {
-    enabled = false,
+    enabled = true,
     pluginName = "lookups", -- name your plugin here
     pluginAuthor = "SonoranCAD", -- author
     configVersion = "1.0",

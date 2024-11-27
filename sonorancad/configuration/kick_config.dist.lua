@@ -6,7 +6,7 @@
     Put all needed configuration in this file.
 ]]
 local config = {
-    enabled = true,
+    enabled = false,
     pluginName = "kick", -- name your plugin here
     pluginAuthor = "TaylorMade#4860", -- author
     configVersion = "1.0", -- version of the plugin

@@ -5,7 +5,7 @@
 ]]
 
 local config = {
-    enabled = true,
+    enabled = false,
     pluginName = "vehreg", -- name your plugin here
     pluginAuthor = "Jordan.#2139", -- author
 	configVersion = "1.0",
