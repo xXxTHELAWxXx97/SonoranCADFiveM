@@ -474,7 +474,7 @@ CreateThread(function()
                     resp)
                     debugLog('SET_SERVERS: ' .. tostring(resp))
                 end)
-            else
+            elseif disableOverride and not needSetup
                 warnLog(
                     'disableOverride is true or there is no additional setup required, skipping any potential auto-IP/port fixing')
             end
