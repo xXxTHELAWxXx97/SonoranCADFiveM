@@ -19,6 +19,7 @@ local config = {
         noApiId = "API ID NOT LINKED TO AN ACCOUNT IN THIS COMMUNITY",
         plateAlrRegisted = "This plate has already been registered to another person",
         helpMsg = 'Register your current vehicle in CAD',
+        noCharFound = "No character found. Please ensure you are logged in to a character.",
         --[[
             Placeholders:
             {{PLATE}} = The plate of the vehicle
