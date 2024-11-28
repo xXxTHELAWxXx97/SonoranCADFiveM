@@ -78,16 +78,18 @@ CreateThread(function()
             goto skip
         end
         local versionFile = json.decode(vfile)
-        if versionFile.submoduleConfigs[k].requiresPlugins ~= nil then
-            for _, plugin in pairs(versionFile.submoduleConfigs[k].requiresPlugins) do
-                local isCritical = plugin.critical
-                if Config.plugins[plugin.name] == nil or not Config.plugins[plugin.name].enabled then
-                    if isCritical then
-                        logError("PLUGIN_DEPENDENCY_ERROR", getErrorText("PLUGIN_DEPENDENCY_ERROR"):format(k, plugin.name))
-                        Config.plugins[k].enabled = false
-                        Config.plugins[k].disableReason = ("Missing dependency %s"):format(plugin.name)
-                    elseif plugin.name ~= "esxsupport" then
-                        warnLog(("[submodule loader] submodule %s requires %s, but it is not installed. Some features may not work properly."):format(k, plugin.name))
+        if Config.plugins[k].enabled then
+            if versionFile.submoduleConfigs[k].requiresPlugins ~= nil then
+                for _, plugin in pairs(versionFile.submoduleConfigs[k].requiresPlugins) do
+                    local isCritical = plugin.critical
+                    if Config.plugins[plugin.name] == nil or not Config.plugins[plugin.name].enabled then
+                        if isCritical then
+                            logError("PLUGIN_DEPENDENCY_ERROR", getErrorText("PLUGIN_DEPENDENCY_ERROR"):format(k, plugin.name))
+                            Config.plugins[k].enabled = false
+                            Config.plugins[k].disableReason = ("Missing dependency %s"):format(plugin.name)
+                        elseif plugin.name ~= "esxsupport" then
+                            warnLog(("[submodule loader] submodule %s requires %s, but it is not installed. Some features may not work properly."):format(k, plugin.name))
+                        end
                     end
                 end
             end
