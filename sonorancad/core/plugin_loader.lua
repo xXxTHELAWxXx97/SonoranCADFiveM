@@ -22,8 +22,6 @@ function CheckForPluginUpdate(name)
     if plugin == nil then
         errorLog(("Submodule %s not found."):format(name))
         return
-    elseif plugin.enabled == false then
-        return
     elseif plugin.check_url == nil or plugin.check_url == "" then
         debugLog(("Submodule %s does not have check_url set. Is it configured correctly?"):format(name))
         return
@@ -32,14 +30,18 @@ function CheckForPluginUpdate(name)
         if code == 200 then
             local remote = json.decode(data)
             if remote == nil then
-                warnLog(("Failed to get a valid response for %s. Skipping."):format(k))
-                debugLog(("Raw output for %s: %s"):format(k, data))
+                if plugin.enabled then
+                    warnLog(("Failed to get a valid response for %s. Skipping."):format(k))
+                    debugLog(("Raw output for %s: %s"):format(k, data))
+                end
             elseif remote.submoduleConfigs[name].version ~= nil and plugin.configVersion ~= nil then
                 local configCompare = compareVersions(remote.submoduleConfigs[name].version, plugin.configVersion)
                 if configCompare.result and not Config.debugMode then
-                    errorLog(("Submodule Updater: %s has a new configuration version. You should look at the template configuration file (%s_config.dist.lua) and update your configuration before using this submodule."):format(name, name))
-                    Config.plugins[name].enabled = false
-                    Config.plugins[name].disableReason = "outdated config file"
+                    if plugin.enabled
+                        errorLog(("Submodule Updater: %s has a new configuration version. You should look at the template configuration file (%s_config.dist.lua) and update your configuration before using this submodule."):format(name, name))
+                        Config.plugins[name].enabled = false
+                        Config.plugins[name].disableReason = "outdated config file"
+                    end
                 else
                     debugLog(("Submodule %s has the same configuration version."):format(name))
                     local distConfig = LoadResourceFile(GetCurrentResourceName(), ("/configuration/%s_config.dist.lua"):format(name))
@@ -55,7 +57,7 @@ function CheckForPluginUpdate(name)
                     end
                 end
             end
-        else
+        elseif plugin.enabled then
             warnLog(("Failed to check submodule config updates for %s: %s %s"):format(name, code, data))
         end
     end, "GET")
