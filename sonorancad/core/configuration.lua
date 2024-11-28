@@ -474,9 +474,9 @@ CreateThread(function()
                     resp)
                     debugLog('SET_SERVERS: ' .. tostring(resp))
                 end)
-            else
+            elseif disableOverride and not needSetup then
                 warnLog(
-                    'disableOverride is true, skipping any potential auto-IP/port fixing')
+                    'disableOverride is true or there is no additional setup required, skipping any potential auto-IP/port fixing')
             end
         end, 'GET', nil, nil)
     end)
@@ -511,7 +511,7 @@ RegisterNetEvent('SonoranCAD::Core::RequestBodycam', function()
     if not Config.proxyUrl or Config.proxyUrl == '' then
         -- tell client we're not ready
         TriggerClientEvent('SonoranCAD::Core::InitBodycam', source, 0)
-    else 
+    else
         -- tell client we're ready
         TriggerClientEvent('SonoranCAD::Core::InitBodycam', source, 1)
     end

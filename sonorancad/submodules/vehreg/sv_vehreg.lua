@@ -51,6 +51,51 @@ CreateThread(function()
 						return;
 					else
 						res = json.decode(res)
+						if #res < 1 then
+							TriggerClientEvent('chat:addMessage', source, {
+								color = {
+									255,
+									0,
+									0
+								},
+								multiline = true,
+								args = {
+									'[CAD - ERROR] ',
+									pluginConfig.language.noCharFound
+								}
+							})
+							return;
+						end
+						if #res[1].sections < 1 then
+							TriggerClientEvent('chat:addMessage', source, {
+								color = {
+									255,
+									0,
+									0
+								},
+								multiline = true,
+								args = {
+									'[CAD - ERROR] ',
+									pluginConfig.language.noCharFound
+								}
+							})
+							return;
+						end
+						if #res[1].sections[1].fields < 1 then
+							TriggerClientEvent('chat:addMessage', source, {
+								color = {
+									255,
+									0,
+									0
+								},
+								multiline = true,
+								args = {
+									'[CAD - ERROR] ',
+									pluginConfig.language.noCharFound
+								}
+							})
+							return;
+						end
 						first = res[1].sections[1].fields[1].value or "Unknown"
 						last = res[1].sections[1].fields[2].value or "Unknown"
 						mi = res[1].sections[1].fields[3].value or "Unknown"
