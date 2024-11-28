@@ -37,7 +37,7 @@ function CheckForPluginUpdate(name)
             elseif remote.submoduleConfigs[name].version ~= nil and plugin.configVersion ~= nil then
                 local configCompare = compareVersions(remote.submoduleConfigs[name].version, plugin.configVersion)
                 if configCompare.result and not Config.debugMode then
-                    if plugin.enabled
+                    if plugin.enabled then
                         errorLog(("Submodule Updater: %s has a new configuration version. You should look at the template configuration file (%s_config.dist.lua) and update your configuration before using this submodule."):format(name, name))
                         Config.plugins[name].enabled = false
                         Config.plugins[name].disableReason = "outdated config file"
