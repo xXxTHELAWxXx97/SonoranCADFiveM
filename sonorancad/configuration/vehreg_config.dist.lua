@@ -8,7 +8,7 @@ local config = {
     enabled = false,
     pluginName = "vehreg", -- name your plugin here
     pluginAuthor = "Jordan.#2139", -- author
-	configVersion = "1.0",
+	configVersion = "1.1",
 
     reigsterCommand = "reg", -- Command to register car
     defaultRegExpire = '01/02/2030', -- The default date that all registrations will expire
@@ -20,6 +20,7 @@ local config = {
         plateAlrRegisted = "This plate has already been registered to another person",
         helpMsg = 'Register your current vehicle in CAD',
         noCharFound = "No character found. Please ensure you are logged in to a character.",
+        incompleteCharData = "Character data is incomplete. Please ensure you have all required data filled out in CAD. Unable to register vehicle.",
         --[[
             Placeholders:
             {{PLATE}} = The plate of the vehicle
