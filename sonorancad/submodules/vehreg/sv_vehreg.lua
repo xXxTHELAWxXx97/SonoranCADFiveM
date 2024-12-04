@@ -50,6 +50,21 @@ CreateThread(function()
 						})
 						return;
 					else
+						if not res or type(res) ~= 'table' then
+							TriggerClientEvent('chat:addMessage', source, {
+								color = {
+									255,
+									0,
+									0
+								},
+								multiline = true,
+								args = {
+									'[CAD - ERROR] ',
+									pluginConfig.language.noCharFound or "No character found. Please ensure you are logged in to a character."
+								}
+							})
+							return;
+						end
 						res = json.decode(res)
 						if #res < 1 then
 							TriggerClientEvent('chat:addMessage', source, {
@@ -61,7 +76,7 @@ CreateThread(function()
 								multiline = true,
 								args = {
 									'[CAD - ERROR] ',
-									pluginConfig.language.noCharFound
+									pluginConfig.language.noCharFound or "No character found. Please ensure you are logged in to a character."
 								}
 							})
 							return;
@@ -76,12 +91,12 @@ CreateThread(function()
 								multiline = true,
 								args = {
 									'[CAD - ERROR] ',
-									pluginConfig.language.noCharFound
+									pluginConfig.language.noCharFound or "No character found. Please ensure you are logged in to a character."
 								}
 							})
 							return;
 						end
-						if #res[1].sections[1].fields < 1 then
+						if #res[1].sections[1].fields < 19 then
 							TriggerClientEvent('chat:addMessage', source, {
 								color = {
 									255,
@@ -91,7 +106,7 @@ CreateThread(function()
 								multiline = true,
 								args = {
 									'[CAD - ERROR] ',
-									pluginConfig.language.noCharFound
+									pluginConfig.language.incompleteCharData or "Character data is incomplete. Please ensure you have all required data filled out in CAD. Unable to register vehicle."
 								}
 							})
 							return;

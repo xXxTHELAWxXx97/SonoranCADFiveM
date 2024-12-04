@@ -142,7 +142,7 @@ CreateThread(function() Config.LoadPlugin("sonrad", function(pluginConfig)
                     debugLog(json.encode(TowerCache))
                     for _,t in ipairs(TowerCache) do
 
-                        if TowerCache[t].NotPhysical then
+                        if t.NotPhysical then
                             -- Handling for Mobile Repeaters
                             title = "Mobile Repeater"
                             color = "#ff00f6"
