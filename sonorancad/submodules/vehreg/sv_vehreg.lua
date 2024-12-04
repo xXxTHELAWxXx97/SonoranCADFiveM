@@ -50,6 +50,7 @@ CreateThread(function()
 						})
 						return;
 					else
+						res = json.decode(res)
 						if not res or type(res) ~= 'table' then
 							TriggerClientEvent('chat:addMessage', source, {
 								color = {
@@ -65,7 +66,6 @@ CreateThread(function()
 							})
 							return;
 						end
-						res = json.decode(res)
 						if #res < 1 then
 							TriggerClientEvent('chat:addMessage', source, {
 								color = {
@@ -81,7 +81,7 @@ CreateThread(function()
 							})
 							return;
 						end
-						if #res[1].sections < 1 then
+						if #res[1].sections < 2 then
 							TriggerClientEvent('chat:addMessage', source, {
 								color = {
 									255,
@@ -96,7 +96,7 @@ CreateThread(function()
 							})
 							return;
 						end
-						if #res[1].sections[1].fields < 19 then
+						if #res[1].sections[2].fields < 18 then
 							TriggerClientEvent('chat:addMessage', source, {
 								color = {
 									255,
@@ -111,25 +111,25 @@ CreateThread(function()
 							})
 							return;
 						end
-						first = res[1].sections[1].fields[1].value or "Unknown"
-						last = res[1].sections[1].fields[2].value or "Unknown"
-						mi = res[1].sections[1].fields[3].value or "Unknown"
-						dob = res[1].sections[1].fields[4].value or "Unknown"
-						age = res[1].sections[1].fields[5].value or "Unknown"
-						sex = res[1].sections[1].fields[6].value or "Unknown"
-						aka = res[1].sections[1].fields[7].value or "Unknown"
-						residence = res[1].sections[1].fields[8].value or "Unknown"
-						zip = res[1].sections[1].fields[9].value or "Unknown"
-						occupation = res[1].sections[1].fields[10].value or "Unknown"
-						height = res[1].sections[1].fields[11].value or "Unknown"
-						weight = res[1].sections[1].fields[12].value or "Unknown"
-						skin = res[1].sections[1].fields[13].value or "Unknown"
-						hair = res[1].sections[1].fields[14].value or "Unknown"
-						eyes = res[1].sections[1].fields[15].value or "Unknown"
-						emergencyContact = res[1].sections[1].fields[16].value or "Unknown"
-						emergencyRelationship = res[1].sections[1].fields[17].value or "Unknown"
-						emergencyContactNumber = res[1].sections[1].fields[18].value or "Unknown"
-						img = res[1].sections[1].fields[19].value or "Unknown"
+						first = res[1].sections[2].fields[1].value or "Unknown"
+						last = res[1].sections[2].fields[2].value or "Unknown"
+						mi = res[1].sections[2].fields[3].value or "Unknown"
+						dob = res[1].sections[2].fields[4].value or "Unknown"
+						age = res[1].sections[2].fields[5].value or "Unknown"
+						sex = res[1].sections[2].fields[6].value or "Unknown"
+						aka = res[1].sections[2].fields[7].value or "Unknown"
+						residence = res[1].sections[2].fields[8].value or "Unknown"
+						zip = res[1].sections[2].fields[9].value or "Unknown"
+						occupation = res[1].sections[2].fields[10].value or "Unknown"
+						height = res[1].sections[2].fields[11].value or "Unknown"
+						weight = res[1].sections[2].fields[12].value or "Unknown"
+						skin = res[1].sections[2].fields[13].value or "Unknown"
+						hair = res[1].sections[2].fields[14].value or "Unknown"
+						eyes = res[1].sections[2].fields[15].value or "Unknown"
+						emergencyContact = res[1].sections[2].fields[16].value or "Unknown"
+						emergencyRelationship = res[1].sections[2].fields[17].value or "Unknown"
+						emergencyContactNumber = res[1].sections[2].fields[18].value or "Unknown"
+						img = res[1].sections[1].fields[1].value or "Unknown"
 					end
 				end)
 				Citizen.Wait(1000)
