@@ -34,7 +34,7 @@ function CheckForPluginUpdate(name)
                     warnLog(("Failed to get a valid response for %s. Skipping."):format(k))
                     debugLog(("Raw output for %s: %s"):format(k, data))
                 end
-            elseif remote.submoduleConfigs[name].version ~= nil and plugin.configVersion ~= nil then
+            elseif (remote.submoduleConfigs[name].version ~= nil and plugin.configVersion ~= nil) then
                 local configCompare = compareVersions(remote.submoduleConfigs[name].version, plugin.configVersion)
                 if configCompare.result and not Config.debugMode then
                     if plugin.enabled then
@@ -54,6 +54,30 @@ function CheckForPluginUpdate(name)
                         backupFile:close()
                         os.remove(("%s/configuration/%s_config.dist.lua"):format(GetResourcePath(GetCurrentResourceName()), name))
                         debugLog(("Submodule %s configuration file is up to date. Backup saved."):format(name))
+                    end
+                end
+            elseif name == 'locations' then
+                if (remote.submoduleConfigs[name].version ~= nil and plugin.pluginVersion ~= nil) then
+                    local configCompare = compareVersions(remote.submoduleConfigs[name].version, plugin.pluginVersion)
+                    if configCompare.result and not Config.debugMode then
+                        if plugin.enabled then
+                            errorLog(("Submodule Updater: %s has a new configuration version. You should look at the template configuration file (%s_config.dist.lua) and update your configuration before using this submodule."):format(name, name))
+                            Config.plugins[name].enabled = false
+                            Config.plugins[name].disableReason = "outdated config file"
+                        end
+                    else
+                        debugLog(("Submodule %s has the same configuration version."):format(name))
+                        local distConfig = LoadResourceFile(GetCurrentResourceName(), ("/configuration/%s_config.dist.lua"):format(name))
+                        local normalConfig = LoadResourceFile(GetCurrentResourceName(), ("/configuration/%s_config.lua"):format(name))
+                        if distConfig and normalConfig then
+                            local filePath = ("%s/configuration/config-backup"):format(GetResourcePath(GetCurrentResourceName()))
+                            exports['sonorancad']:CreateFolderIfNotExisting(filePath)
+                            local backupFile = io.open(("%s/configuration/config-backup/%s_config.lua"):format(GetResourcePath(GetCurrentResourceName()), name), "w")
+                            backupFile:write(distConfig)
+                            backupFile:close()
+                            os.remove(("%s/configuration/%s_config.dist.lua"):format(GetResourcePath(GetCurrentResourceName()), name))
+                            debugLog(("Submodule %s configuration file is up to date. Backup saved."):format(name))
+                        end
                     end
                 end
             end

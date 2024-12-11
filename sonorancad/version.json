@@ -49,7 +49,7 @@
       "requiresPlugins": []
     },
     "locations": {
-      "version": "1.0",
+      "version": "1.1",
       "requiresPlugins": []
     },
     "lookups": {
@@ -99,7 +99,7 @@
       "requiresPlugins": []
     },
     "wraithv2": {
-      "version": "1.5",
+      "version": "1.6",
       "requiresPlugins": [
         {
           "name": "lookups",
