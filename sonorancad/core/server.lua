@@ -126,6 +126,9 @@ function performApiRequest(postData, type, cb)
     else
         return warnLog(("API request failed: endpoint %s is not registered. Use the registerApiType function to register this endpoint with the appropriate type."):format(type))
     end
+	if not cb then
+		cb = function() end
+	end
     local url = ""
     if endpoint == "support" then
         apiUrl = "https://api.sonoransoftware.com/"
