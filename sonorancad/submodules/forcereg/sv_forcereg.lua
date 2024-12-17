@@ -43,6 +43,19 @@ if pluginConfig.enabled then
     end)
 
     AddEventHandler("SonoranCAD::apicheck:CheckPlayerLinkedResponse", function(player, identifier, exists)
+        if not pluginConfig.whitelist then
+            pluginConfig.whitelist = {
+                enabled = false,
+                mode = "qb-core", -- qb-core, esx, ace
+                aces = { -- ace permissions will see the message
+                    "forcereg.whitelist"
+                },
+                jobs = { -- QB or ESX jobs will see the message
+                    "police"
+                }
+            }
+            print("Forcereg: Whitelist configuration not found, using defaults. Please update your configuration.")
+        end
         if pluginConfig.whitelist.enabled then
             if pluginConfig.whitelist.mode == "ace" then
                 local aceAllowed = false
