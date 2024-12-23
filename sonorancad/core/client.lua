@@ -414,7 +414,7 @@ CreateThread(function()
             if bodyCamOn then
                 SendNUIMessage({
                     type = 'playSound',
-                    transactionFile = GetResourcePath(GetCurrentResourceName()) .. '/core/client_nui/sounds/beeps.mp3',
+                    transactionFile = 'sounds/beeps.mp3',
                     transactionVolume = 0.3
                 })
                 Wait(Config.bodycamBeepFrequency)
