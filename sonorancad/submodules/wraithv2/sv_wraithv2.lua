@@ -83,10 +83,10 @@ if pluginConfig.enabled then
 			end
 			if #charData < 1 then
 				debugLog('Invalid registration')
-				return
+				reg = false
 			end
-			local person = charData[1]
 			if reg then
+				local person = charData[1]
 				TriggerEvent('SonoranCAD::wraithv2:PlateLocked', source, reg, cam, plate, index)
 				local plate = reg.plate
 				if regData == nil then
@@ -226,6 +226,14 @@ if pluginConfig.enabled then
 						TriggerEvent('SonoranCAD::wraithv2:NoRegAlert', plate)
 						TriggerClientEvent('SonoranCAD::wraithv2:PlaySound', source, 'registration')
 					end
+				end
+			else
+				if pluginConfig.alertNoRegistration then
+					TriggerClientEvent('pNotify:SendNotification', source,
+									{text = '<b style=\'color:yellow\'>' .. camCapitalized .. ' ALPR</b><br/>Plate: ' .. plate:upper() .. '<br/>Status: Not Registered', type = 'warning', queue = 'alpr',
+						timeout = pluginConfig.notificationTimers.noReg, layout = 'centerLeft'})
+					TriggerEvent('SonoranCAD::wraithv2:NoRegAlert', plate)
+					TriggerClientEvent('SonoranCAD::wraithv2:PlaySound', source, 'registration')
 				end
 			end
 		end)
