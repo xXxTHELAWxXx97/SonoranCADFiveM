@@ -19,6 +19,7 @@ if pluginConfig.enabled then
         end
         if pluginConfig.enablePanic then
             TriggerEvent('chat:addSuggestion', '/panic', 'Sends a panic signal to your SonoranCAD')
+            RegisterKeyMapping('panic', 'Panic Button', 'keyboard', '')
         end
     end)
 end
