@@ -200,32 +200,27 @@ if pluginConfig.enabled then
 				local status = regData[1][statusUid]
 				local expires = (regData[1][expiresUid] and pluginConfig.useExpires) and ('Expires: %s<br/>'):format(regData[1][expiresUid]) or ''
 				local owner = (pluginConfig.useMiddleInitial and person.mi ~= '') and ('%s %s, %s'):format(person.first, person.last, person.mi) or ('%s %s'):format(person.first, person.last)
+				print('status', status)
+				print('flagStatuses', json.encode(flagStatuses))
+				print('has_value(flagStatuses, status)', has_value(flagStatuses, status))
 				if status ~= nil and has_value(flagStatuses, status) then
 					TriggerClientEvent('pNotify:SendNotification', source,
 									{text = ('<b style=\'color:yellow\'>' .. camCapitalized .. ' ALPR</b><br/>Plate: %s<br/>Status: %s<br/>%sOwner: %s'):format(plate:upper(), status, expires, owner),
 						type = 'success', queue = 'alpr', timeout = pluginConfig.notificationTimers.validReg, layout = 'centerLeft'})
-					if #boloData > 0 then
-						local flags = table.concat(boloData, ',')
-						TriggerClientEvent('pNotify:SendNotification', source, {text = ('<b style=\'color:red\'>BOLO ALERT!<br/>Plate: %s<br/>Flags: %s'):format(plate:upper(), flags), type = 'error', queue = 'bolo',
-							timeout = pluginConfig.notificationTimers.bolo, layout = 'centerLeft'})
-						TriggerEvent('SonoranCAD::wraithv2:BoloAlert', plate, flags)
-						TriggerClientEvent('SonoranCAD::wraithv2:PlaySound', source, 'bolo')
-					end
-					if #warrantData > 0 then
-						local warrants = table.concat(warrantData, ',')
-						TriggerClientEvent('pNotify:SendNotification', source, {text = ('<b style=\'color:red\'>WARRANT ALERT!<br/>Plate: %s<br/>Flags: %s'):format(plate:upper(), warrants), type = 'error', queue = 'warrant',
-							timeout = pluginConfig.notificationTimers.warrant, layout = 'centerLeft'})
-						TriggerEvent('SonoranCAD::wraithv2:WarrantAlert', plate, warrants)
-						TriggerClientEvent('SonoranCAD::wraithv2:PlaySound', source, 'warrant')
-					end
-				else
-					if pluginConfig.alertNoRegistration then
-						TriggerClientEvent('pNotify:SendNotification', source,
-										{text = '<b style=\'color:yellow\'>' .. camCapitalized .. ' ALPR</b><br/>Plate: ' .. plate:upper() .. '<br/>Status: Not Registered', type = 'warning', queue = 'alpr',
-							timeout = pluginConfig.notificationTimers.noReg, layout = 'centerLeft'})
-						TriggerEvent('SonoranCAD::wraithv2:NoRegAlert', plate)
-						TriggerClientEvent('SonoranCAD::wraithv2:PlaySound', source, 'registration')
-					end
+				end
+				if #boloData > 0 then
+					local flags = table.concat(boloData, ',')
+					TriggerClientEvent('pNotify:SendNotification', source, {text = ('<b style=\'color:red\'>BOLO ALERT!<br/>Plate: %s<br/>Flags: %s'):format(plate:upper(), flags), type = 'error', queue = 'bolo',
+						timeout = pluginConfig.notificationTimers.bolo, layout = 'centerLeft'})
+					TriggerEvent('SonoranCAD::wraithv2:BoloAlert', plate, flags)
+					TriggerClientEvent('SonoranCAD::wraithv2:PlaySound', source, 'bolo')
+				end
+				if #warrantData > 0 then
+					local warrants = table.concat(warrantData, ',')
+					TriggerClientEvent('pNotify:SendNotification', source, {text = ('<b style=\'color:red\'>WARRANT ALERT!<br/>Plate: %s<br/>Flags: %s'):format(plate:upper(), warrants), type = 'error', queue = 'warrant',
+						timeout = pluginConfig.notificationTimers.warrant, layout = 'centerLeft'})
+					TriggerEvent('SonoranCAD::wraithv2:WarrantAlert', plate, warrants)
+					TriggerClientEvent('SonoranCAD::wraithv2:PlaySound', source, 'warrant')
 				end
 			else
 				if pluginConfig.alertNoRegistration then
