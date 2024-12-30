@@ -28,6 +28,15 @@ local config = {
             {{LAST}} = The first name of the charactes currently active in CAD
         ]]
         successReg = "Vehicle ({{PLATE}}) successfully registered to ^2{{FIRST}} {{LAST}}"
+    },
+    -- If you have changed your field UID's in CAD please update the corresponding values here. (Field UID goes in the quotes on the right)
+    recordData = {
+        colorUid = "color",
+        plateUid = "plate",
+        typeUid = "type",
+        modelUid = "model",
+        statusUid = "status",
+        expiresUid = "_imtoih149",
     }
 }
 
