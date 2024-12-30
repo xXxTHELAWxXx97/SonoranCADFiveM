@@ -8,7 +8,7 @@ local config = {
     enabled = false,
     pluginName = "vehreg", -- name your plugin here
     pluginAuthor = "Jordan.#2139", -- author
-	configVersion = "1.1",
+	configVersion = "1.2",
 
     reigsterCommand = "reg", -- Command to register car
     defaultRegExpire = '01/02/2030', -- The default date that all registrations will expire

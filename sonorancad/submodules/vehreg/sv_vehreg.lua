@@ -73,6 +73,17 @@ CreateThread(function()
 					end
 				end)
 				Citizen.Wait(1000)
+				if not pluginConfig.recordData then
+					pluginConfig.recordData = {
+						colorUid = "color",
+						plateUid = "plate",
+						typeUid = "type",
+						modelUid = "model",
+						statusUid = "status",
+						expiresUid = "_imtoih149",
+					}
+					warnLog('Record data not found in configuration. Using default values. Please update your configuration using the vehreg_config.dist.lua file located in the configuration folder')
+				end
 				local replaceValues = {
 					[pluginConfig.recordData.colorUid] = primary,
 					[pluginConfig.recordData.plateUid] = plate,
