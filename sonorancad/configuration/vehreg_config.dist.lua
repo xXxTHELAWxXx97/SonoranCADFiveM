@@ -8,7 +8,7 @@ local config = {
     enabled = false,
     pluginName = "vehreg", -- name your plugin here
     pluginAuthor = "Jordan.#2139", -- author
-	configVersion = "1.1",
+	configVersion = "1.2",
 
     reigsterCommand = "reg", -- Command to register car
     defaultRegExpire = '01/02/2030', -- The default date that all registrations will expire
@@ -28,6 +28,15 @@ local config = {
             {{LAST}} = The first name of the charactes currently active in CAD
         ]]
         successReg = "Vehicle ({{PLATE}}) successfully registered to ^2{{FIRST}} {{LAST}}"
+    },
+    -- If you have changed your field UID's in CAD please update the corresponding values here. (Field UID goes in the quotes on the right)
+    recordData = {
+        colorUid = "color",
+        plateUid = "plate",
+        typeUid = "type",
+        modelUid = "model",
+        statusUid = "status",
+        expiresUid = "_imtoih149",
     }
 }
 
