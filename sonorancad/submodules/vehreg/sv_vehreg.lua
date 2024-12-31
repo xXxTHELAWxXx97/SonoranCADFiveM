@@ -2,6 +2,7 @@ CreateThread(function()
 	Config.LoadPlugin('vehreg', function(pluginConfig)
 		if pluginConfig.enabled then
 			local civData = {}
+			local notSetConfig = false
 			local placeholderReplace = function(message, placeholderTable)
 				for k, v in pairs(placeholderTable) do
 					message = message:gsub(k, v)
@@ -74,6 +75,7 @@ CreateThread(function()
 				end)
 				Citizen.Wait(1000)
 				if not pluginConfig.recordData then
+					notSetConfig = true
 					pluginConfig.recordData = {
 						colorUid = "color",
 						plateUid = "plate",
@@ -82,6 +84,9 @@ CreateThread(function()
 						statusUid = "status",
 						expiresUid = "_imtoih149",
 					}
+					warnLog('Record data not found in configuration. Using default values. Please update your configuration using the vehreg_config.dist.lua file located in the configuration folder')
+				end
+				if notSetConfig then
 					warnLog('Record data not found in configuration. Using default values. Please update your configuration using the vehreg_config.dist.lua file located in the configuration folder')
 				end
 				local replaceValues = {
