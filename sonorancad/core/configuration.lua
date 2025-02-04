@@ -491,15 +491,23 @@ CreateThread(function()
     -- attempt to fetch web_baseUrl
     local baseUrl = ''
     local counter = 0
-    while baseUrl == '' do
-        Wait(1000)
+    if Config.bodycamEnabled then
+        local counter = 0
+        while baseUrl == '' do
+            Wait(1000)
+            baseUrl = GetConvar('web_baseUrl', '')
+
+            -- Every 60 seconds, log a warning
+            counter = counter + 1
+            if counter % 60 == 0 then
+                warnLog('Still waiting for web_baseUrl convar to be set...bodycam will not work until this is set.')
+            end
+        end
+    else
+        -- Run the loop once
         baseUrl = GetConvar('web_baseUrl', '')
-        -- every 60 seconds, log a warning
-        counter = counter + 1
-        if counter % 60 == 0 then
-            warnLog(
-                'Still waiting for web_baseUrl convar to be set...bodycam will not work until this is set.'
-            )
+        if baseUrl == '' then
+            warnLog('Bodycam is disabled and web_baseUrl is not set. Skipping loop.')
         end
     end
     Config.proxyUrl = ('https://%s/sonorancad/'):format(GetConvar('web_baseUrl',''))
