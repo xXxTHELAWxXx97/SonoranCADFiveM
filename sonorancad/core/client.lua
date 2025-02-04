@@ -260,7 +260,7 @@ RegisterNetEvent('SonoranCAD::core::ScreenshotOff', function()
     end
 end)
 
-RegisterNetEvent('SonoranCAD::Core::InitBodycam', function(isReady)
+RegisterNetEvent('SonoranCAD::Core::InitBodycam', function(isReady, apiVersion)
     if isReady == 0 then
         CreateThread(function()
             -- still waiting, request again in 10s
