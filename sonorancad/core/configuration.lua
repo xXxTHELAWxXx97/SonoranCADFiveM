@@ -521,6 +521,10 @@ RegisterNetEvent('SonoranCAD::Core::RequestBodycam', function()
         TriggerClientEvent('SonoranCAD::Core::InitBodycam', source, 0, Config.apiVersion)
     else
         -- tell client we're ready
+        if Config.apiVersion == -1 then
+            debugLog('API version not set, waiting for it to be set...')
+            while Config.apiVersion == -1 do Wait(1) end
+        end
         TriggerClientEvent('SonoranCAD::Core::InitBodycam', source, 1, Config.apiVersion)
     end
 end)
