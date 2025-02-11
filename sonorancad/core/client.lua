@@ -270,6 +270,9 @@ RegisterNetEvent('SonoranCAD::Core::InitBodycam', function(isReady, apiVersion)
         end)
         return
     end
+    if apiVersion ~= -1 then
+        Config.apiVersion = apiVersion
+    end
     if Config.bodycamEnabled then
         print('Bodycam init')
         -- Command to toggle bodycam on and off
@@ -383,6 +386,18 @@ AddEventHandler('playerSpawned', function()
     TriggerServerEvent('SonoranCAD::core:PlayerReady')
     inited = true
     TriggerServerEvent('SonoranCAD::Core::RequestBodycam')
+end)
+
+AddEventHandler('onClientResourceStart', function(resourceName) --When resource starts, stop the GUI showing.
+	if(GetCurrentResourceName() ~= resourceName) then
+		return
+	end
+    Wait(10000)
+    if not inited then
+        TriggerServerEvent('SonoranCAD::core:PlayerReady')
+        inited = true
+        TriggerServerEvent('SonoranCAD::Core::RequestBodycam')
+    end
 end)
 
 RegisterNetEvent('SonoranCAD::core:debugModeToggle')
