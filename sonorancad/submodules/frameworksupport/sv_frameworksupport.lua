@@ -8,12 +8,31 @@
 	Config.LoadPlugin('frameworksupport', function(pluginConfig)
 
 		if pluginConfig.enabled then
+
+			if GetResourceState('qb-core') ~= "started" and GetResourceState('es_extended') ~= 'started' then
+				errorLog('Both qb-core and es_extended are not started. Disabling framework support.')
+				pluginConfig.enabled = false
+				pluginConfig.disableReason = 'qb-core and es_extended not started'
+				return
+			end
 			local QBCore = nil
             local ESX = nil
 			if pluginConfig.usingQBCore then
+				if GetResourceState('qb-core') ~= "started" then
+					errorLog('qb-core is not started. Disabling framework support.')
+					pluginConfig.enabled = false
+					pluginConfig.disableReason = 'qb-core not started'
+					return
+				end
 				QBCore = exports['qb-core']:GetCoreObject()
 			end
 			if not pluginConfig.usingQBCore then
+				if GetResourceState('es_extended') ~= 'started' then
+					errorLog('es_extended is not started. Disabling framework support.')
+					pluginConfig.enabled = false
+					pluginConfig.disableReason = 'es_extended not started'
+					return
+				end
 				ESX = exports['es_extended']:getSharedObject()
 			end
 			JobCache = {}

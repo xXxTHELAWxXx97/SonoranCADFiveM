@@ -22,8 +22,6 @@ function CheckForPluginUpdate(name)
     if plugin == nil then
         errorLog(("Submodule %s not found."):format(name))
         return
-    elseif plugin.enabled == false then
-        return
     elseif plugin.check_url == nil or plugin.check_url == "" then
         debugLog(("Submodule %s does not have check_url set. Is it configured correctly?"):format(name))
         return
@@ -32,17 +30,58 @@ function CheckForPluginUpdate(name)
         if code == 200 then
             local remote = json.decode(data)
             if remote == nil then
-                warnLog(("Failed to get a valid response for %s. Skipping."):format(k))
-                debugLog(("Raw output for %s: %s"):format(k, data))
-            elseif remote.submoduleConfigs[name].version ~= nil and plugin.configVersion ~= nil then
+                if plugin.enabled then
+                    warnLog(("Failed to get a valid response for %s. Skipping."):format(k))
+                    debugLog(("Raw output for %s: %s"):format(k, data))
+                end
+            elseif (remote.submoduleConfigs[name].version ~= nil and plugin.configVersion ~= nil) then
                 local configCompare = compareVersions(remote.submoduleConfigs[name].version, plugin.configVersion)
                 if configCompare.result and not Config.debugMode then
-                    errorLog(("Submodule Updater: %s has a new configuration version. You should look at the template configuration file (%s_config.dist.lua) and update your configuration before using this submodule."):format(name, name))
-                    Config.plugins[name].enabled = false
-                    Config.plugins[name].disableReason = "outdated config file"
+                    if plugin.enabled then
+                        errorLog(("Submodule Updater: %s has a new configuration version. You should look at the template configuration file (%s_config.dist.lua) and update your configuration before using this submodule. Guide: https://sonoran.link/config-update"):format(name, name))
+                        Config.plugins[name].enabled = false
+                        Config.plugins[name].disableReason = "outdated config file"
+                    end
+                else
+                    debugLog(("Submodule %s has the same configuration version."):format(name))
+                    local distConfig = LoadResourceFile(GetCurrentResourceName(), ("/configuration/%s_config.dist.lua"):format(name))
+                    local normalConfig = LoadResourceFile(GetCurrentResourceName(), ("/configuration/%s_config.lua"):format(name))
+                    if distConfig and normalConfig then
+                        local filePath = ("%s/configuration/config-backup"):format(GetResourcePath(GetCurrentResourceName()))
+                        exports['sonorancad']:CreateFolderIfNotExisting(filePath)
+                        local backupFile = io.open(("%s/configuration/config-backup/%s_config.lua"):format(GetResourcePath(GetCurrentResourceName()), name), "w")
+                        backupFile:write(distConfig)
+                        backupFile:close()
+                        os.remove(("%s/configuration/%s_config.dist.lua"):format(GetResourcePath(GetCurrentResourceName()), name))
+                        debugLog(("Submodule %s configuration file is up to date. Backup saved."):format(name))
+                    end
+                end
+            elseif name == 'locations' then
+                if (remote.submoduleConfigs[name].version ~= nil and plugin.pluginVersion ~= nil) then
+                    local configCompare = compareVersions(remote.submoduleConfigs[name].version, plugin.pluginVersion)
+                    if configCompare.result and not Config.debugMode then
+                        if plugin.enabled then
+                            errorLog(("Submodule Updater: %s has a new configuration version. You should look at the template configuration file (%s_config.dist.lua) and update your configuration before using this submodule."):format(name, name))
+                            Config.plugins[name].enabled = false
+                            Config.plugins[name].disableReason = "outdated config file"
+                        end
+                    else
+                        debugLog(("Submodule %s has the same configuration version."):format(name))
+                        local distConfig = LoadResourceFile(GetCurrentResourceName(), ("/configuration/%s_config.dist.lua"):format(name))
+                        local normalConfig = LoadResourceFile(GetCurrentResourceName(), ("/configuration/%s_config.lua"):format(name))
+                        if distConfig and normalConfig then
+                            local filePath = ("%s/configuration/config-backup"):format(GetResourcePath(GetCurrentResourceName()))
+                            exports['sonorancad']:CreateFolderIfNotExisting(filePath)
+                            local backupFile = io.open(("%s/configuration/config-backup/%s_config.lua"):format(GetResourcePath(GetCurrentResourceName()), name), "w")
+                            backupFile:write(distConfig)
+                            backupFile:close()
+                            os.remove(("%s/configuration/%s_config.dist.lua"):format(GetResourcePath(GetCurrentResourceName()), name))
+                            debugLog(("Submodule %s configuration file is up to date. Backup saved."):format(name))
+                        end
+                    end
                 end
             end
-        else
+        elseif plugin.enabled then
             warnLog(("Failed to check submodule config updates for %s: %s %s"):format(name, code, data))
         end
     end, "GET")
@@ -63,16 +102,18 @@ CreateThread(function()
             goto skip
         end
         local versionFile = json.decode(vfile)
-        if versionFile.submoduleConfigs[k].requiresPlugins ~= nil then
-            for _, plugin in pairs(versionFile.submoduleConfigs[k].requiresPlugins) do
-                local isCritical = plugin.critical
-                if Config.plugins[plugin.name] == nil or not Config.plugins[plugin.name].enabled then
-                    if isCritical then
-                        logError("PLUGIN_DEPENDENCY_ERROR", getErrorText("PLUGIN_DEPENDENCY_ERROR"):format(k, plugin.name))
-                        Config.plugins[k].enabled = false
-                        Config.plugins[k].disableReason = ("Missing dependency %s"):format(plugin.name)
-                    elseif plugin.name ~= "esxsupport" then
-                        warnLog(("[submodule loader] submodule %s requires %s, but it is not installed. Some features may not work properly."):format(k, plugin.name))
+        if Config.plugins[k].enabled then
+            if versionFile.submoduleConfigs[k].requiresPlugins ~= nil then
+                for _, plugin in pairs(versionFile.submoduleConfigs[k].requiresPlugins) do
+                    local isCritical = plugin.critical
+                    if Config.plugins[plugin.name] == nil or not Config.plugins[plugin.name].enabled then
+                        if isCritical then
+                            logError("PLUGIN_DEPENDENCY_ERROR", getErrorText("PLUGIN_DEPENDENCY_ERROR"):format(k, plugin.name))
+                            Config.plugins[k].enabled = false
+                            Config.plugins[k].disableReason = ("Missing dependency %s"):format(plugin.name)
+                        elseif plugin.name ~= "esxsupport" then
+                            warnLog(("[submodule loader] submodule %s requires %s, but it is not installed. Some features may not work properly."):format(k, plugin.name))
+                        end
                     end
                 end
             end

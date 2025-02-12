@@ -8,7 +8,7 @@ Sonoran Plugins
 
 ]]
 local config = {
-    enabled = true,
+    enabled = false,
     configVersion = "1.2",
     pluginName = "frameworksupport", -- name your plugin here
     pluginAuthor = "SonoranCAD", -- author

@@ -260,7 +260,7 @@ RegisterNetEvent('SonoranCAD::core::ScreenshotOff', function()
     end
 end)
 
-RegisterNetEvent('SonoranCAD::Core::InitBodycam', function(isReady)
+RegisterNetEvent('SonoranCAD::Core::InitBodycam', function(isReady, apiVersion)
     if isReady == 0 then
         CreateThread(function()
             -- still waiting, request again in 10s
@@ -269,6 +269,9 @@ RegisterNetEvent('SonoranCAD::Core::InitBodycam', function(isReady)
             TriggerServerEvent('SonoranCAD::Core::RequestBodycam')
         end)
         return
+    end
+    if apiVersion ~= -1 then
+        Config.apiVersion = apiVersion
     end
     if Config.bodycamEnabled then
         print('Bodycam init')
@@ -385,6 +388,18 @@ AddEventHandler('playerSpawned', function()
     TriggerServerEvent('SonoranCAD::Core::RequestBodycam')
 end)
 
+AddEventHandler('onClientResourceStart', function(resourceName) --When resource starts, stop the GUI showing.
+	if(GetCurrentResourceName() ~= resourceName) then
+		return
+	end
+    Wait(10000)
+    if not inited then
+        TriggerServerEvent('SonoranCAD::core:PlayerReady')
+        inited = true
+        TriggerServerEvent('SonoranCAD::Core::RequestBodycam')
+    end
+end)
+
 RegisterNetEvent('SonoranCAD::core:debugModeToggle')
 AddEventHandler('SonoranCAD::core:debugModeToggle',
                 function(toggle) Config.debugMode = toggle end)
@@ -414,7 +429,7 @@ CreateThread(function()
             if bodyCamOn then
                 SendNUIMessage({
                     type = 'playSound',
-                    transactionFile = GetResourcePath(GetCurrentResourceName()) .. '/core/client_nui/sounds/beeps.mp3',
+                    transactionFile = 'sounds/beeps.mp3',
                     transactionVolume = 0.3
                 })
                 Wait(Config.bodycamBeepFrequency)

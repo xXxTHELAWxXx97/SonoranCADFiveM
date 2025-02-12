@@ -7,8 +7,8 @@
 
 ]]
 local config = {
-    enabled = false,
-    configVersion = "1.0",
+    enabled = true,
+    configVersion = "1.1",
     pluginName = "forcereg", -- name your plugin here
     pluginAuthor = "SonoranCAD", -- author
     requiresPlugins = {}, -- required plugins for this plugin to work, separated by commas
@@ -32,7 +32,19 @@ local config = {
     verifyMessage = "Type ~r~/verifycad~s~ in chat when finished.",
 
     -- What does the user do once they log in?
-    instructionalMessage = "Head over to settings once logged in, and enter the ~g~API ID~w~ given below in the API ID field."
+    instructionalMessage = "Head over to settings once logged in, and enter the ~g~API ID~w~ given below in the API ID field.",
+
+    -- Would you like to only show this message to players who are whitelisted?
+    whitelist = {
+        enabled = false,
+        mode = "qb-core", -- qb-core, esx, ace
+        aces = { -- ace permissions will see the message
+            "forcereg.whitelist"
+        },
+        jobs = { -- QB or ESX jobs will see the message
+            "police"
+        }
+    }
 }
 
 if config.enabled then

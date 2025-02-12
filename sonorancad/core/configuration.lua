@@ -474,9 +474,9 @@ CreateThread(function()
                     resp)
                     debugLog('SET_SERVERS: ' .. tostring(resp))
                 end)
-            else
+            elseif disableOverride and not needSetup then
                 warnLog(
-                    'disableOverride is true, skipping any potential auto-IP/port fixing')
+                    'disableOverride is true or there is no additional setup required, skipping any potential auto-IP/port fixing')
             end
         end, 'GET', nil, nil)
     end)
@@ -491,29 +491,41 @@ CreateThread(function()
     -- attempt to fetch web_baseUrl
     local baseUrl = ''
     local counter = 0
-    while baseUrl == '' do
-        Wait(1000)
+    if Config.bodycamEnabled then
+        local counter = 0
+        while baseUrl == '' do
+            Wait(1000)
+            baseUrl = GetConvar('web_baseUrl', '')
+
+            -- Every 60 seconds, log a warning
+            counter = counter + 1
+            if counter % 60 == 0 then
+                warnLog('Still waiting for web_baseUrl convar to be set...bodycam will not work until this is set.')
+            end
+        end
+    else
+        -- Run the loop once
         baseUrl = GetConvar('web_baseUrl', '')
-        -- every 60 seconds, log a warning
-        counter = counter + 1
-        if counter % 60 == 0 then
-            warnLog(
-                'Still waiting for web_baseUrl convar to be set...bodycam will not work until this is set.'
-            )
+        if baseUrl == '' then
+            warnLog('Bodycam is disabled and web_baseUrl is not set. Skipping loop.')
         end
     end
     Config.proxyUrl = ('https://%s/sonorancad/'):format(GetConvar('web_baseUrl',''))
     debugLog(('Set proxyUrl to %s'):format(Config.proxyUrl))
-    TriggerClientEvent('SonoranCAD::Core::InitBodycam', -1, 1)
+    TriggerClientEvent('SonoranCAD::Core::InitBodycam', -1, 1, Config.apiVersion)
 end)
 
 RegisterNetEvent('SonoranCAD::Core::RequestBodycam', function()
     if not Config.proxyUrl or Config.proxyUrl == '' then
         -- tell client we're not ready
-        TriggerClientEvent('SonoranCAD::Core::InitBodycam', source, 0)
-    else 
+        TriggerClientEvent('SonoranCAD::Core::InitBodycam', source, 0, Config.apiVersion)
+    else
         -- tell client we're ready
-        TriggerClientEvent('SonoranCAD::Core::InitBodycam', source, 1)
+        if Config.apiVersion == -1 then
+            debugLog('API version not set, waiting for it to be set...')
+            while Config.apiVersion == -1 do Wait(1000) end
+        end
+        TriggerClientEvent('SonoranCAD::Core::InitBodycam', source, 1, Config.apiVersion)
     end
 end)
 
