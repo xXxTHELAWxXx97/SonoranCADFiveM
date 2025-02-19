@@ -361,4 +361,17 @@ CreateThread(function() Config.LoadPlugin("sonrad", function(pluginConfig)
         end)
     end
 
+    AddEventHandler('SonoranCAD::pushevents:UnitLogin', function(unit)
+        if pluginConfig.syncRadioName.enabled then
+            local radioName = pluginConfig.syncRadioName.nameFormat
+            radioName = radioName:gsub("{UNIT_NUMBER}", unit.data.unitNum)
+            radioName = radioName:gsub("{UNIT_NAME}", unit.data.name)
+            local postData = {
+                identity = unit.accId,
+                name = radioName
+            }
+            exports['sonoranradio']:serverNameChange(postData)
+        end
+    end)
+
 end) end)
