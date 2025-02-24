@@ -43,7 +43,8 @@ files {
     'core/client_nui/js/*.js',
     'core/client_nui/sounds/*.mp3',
     'core/client_nui/img/logo.gif',
-    'submodules/**/*.mp3'
+    'submodules/**/*.mp3',
+    'submodules/postals/*.json'
 }
 
 data_file 'DLC_ITYP_REQUEST' 'stream/**/*.ytyp'
