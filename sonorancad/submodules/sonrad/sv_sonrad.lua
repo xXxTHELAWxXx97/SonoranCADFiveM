@@ -241,6 +241,10 @@ CreateThread(function() Config.LoadPlugin("sonrad", function(pluginConfig)
             RegisterNetEvent("SonoranCAD::sonrad:SyncOneTower")
             AddEventHandler("SonoranCAD::sonrad:SyncOneTower", function(towerId, newTower)
                 local oldTower, towerIndex = GetTowerFromId(towerId)
+                if not oldTower then
+                    debugLog("Tower not found in cache... Ignoring")
+                    return
+                end
                 local BlipID = oldTower.BlipID
                 if oldTower.PropPosition.x == newTower.PropPosition.x and oldTower.PropPosition.y == newTower.PropPosition.y then
                     --debugLog("No Changes During Sync... Ignoring" .. towerIndex)
