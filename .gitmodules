@@ -6,4 +6,4 @@
 	url = https://github.com/Sonoran-Software/wk_wars2x.git
 [submodule "nearest-postal"]
 	path = nearest-postal
-	url = https://github.com/DevBlocky/nearest-postal
+	url = https://github.com/DevBlocky/nearest-postal.git
