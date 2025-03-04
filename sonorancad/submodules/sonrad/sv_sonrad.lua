@@ -364,7 +364,13 @@ CreateThread(function() Config.LoadPlugin("sonrad", function(pluginConfig)
             end
         end)
     end
-
+    if not pluginConfig.syncRadioName or #pluginConfig.syncRadioName == 0 then
+        pluginConfig.syncRadioName = {
+            enabled = false, -- should the radio name be synced with the CAD?
+            nameFormat = "{UNIT_NUMBER} | {UNIT_NAME}" -- format of the radio name | available variables: {UNIT_NUMBER}, {UNIT_NAME}
+        }
+        warnLog('Missing critial configuration for Sonrad. Missing syncRadioName configuration, using default values... Please update from sonrad_config.dist.lua')
+    end
     AddEventHandler('SonoranCAD::pushevents:UnitLogin', function(unit)
         if pluginConfig.syncRadioName.enabled then
             local radioName = pluginConfig.syncRadioName.nameFormat
