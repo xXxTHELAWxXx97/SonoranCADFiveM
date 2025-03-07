@@ -364,7 +364,7 @@ CreateThread(function() Config.LoadPlugin("sonrad", function(pluginConfig)
             end
         end)
     end
-    if not pluginConfig.syncRadioName or #pluginConfig.syncRadioName == 0 then
+    if not pluginConfig.syncRadioName then
         pluginConfig.syncRadioName = {
             enabled = false, -- should the radio name be synced with the CAD?
             nameFormat = "{UNIT_NUMBER} | {UNIT_NAME}" -- format of the radio name | available variables: {UNIT_NUMBER}, {UNIT_NAME}
