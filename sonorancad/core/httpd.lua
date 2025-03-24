@@ -257,6 +257,10 @@ local PushEventHandler = {
 	end
 }
 
+RegisterNetEvent('SonoranCAD::RegisterPushEvent', function(type, event)
+	PushEventHandler[type] = event
+end)
+
 SetHttpHandler(function(req, res)
 	local path = req.path
 	local method = req.method
