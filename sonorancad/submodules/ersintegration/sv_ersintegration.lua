@@ -246,6 +246,8 @@ if pluginConfig.enabled then
                 licenseData.replaceValues = generateReplaceValues(pedData, pluginConfig.customRecords.licenseRecordValues, v)
                 licenseData.replaceValues[pluginConfig.customRecords.licenseTypeField] = v.type
             end
+            performApiRequest({licenseData}, 'NEW_RECORD', function(_)
+            end)
         end
     end)
     AddEventHandler('SonoranCAD::ErsIntegration::BuildVehs', function(vehData)
