@@ -96,6 +96,64 @@ local config = {
             end,
         -- Add more keys as needed:
         -- owner = "Owner"  -- Example: if pedData.Owner exists.
+        },
+        licenseRecordId = 4, -- Record ID for license records
+        licenseTypeField = "7eddab31daf4a0182", -- Field ID for license type
+        licenseTypeConfigs = {
+            DRIVER = {
+                type = "DRIVER",
+                is_valid = "is_license_car_valid",
+                license = "license_car",
+            },
+            MOTORCYCLE = {
+                type = "MOTORCYCLE",
+                is_valid = "is_license_bike_valid",
+                license = "license_bike",
+            },
+            BOAT = {
+                type = "BOAT",
+                is_valid = "is_license_boat_valid",
+                license = "license_boat",
+            },
+            PILOT = {
+                type = "PILOT",
+                is_valid = "is_license_pilot_valid",
+                license = "license_pilot",
+            },
+            CDL = {
+                type = "CDL",
+                is_valid = "is_license_truck_valid",
+                license = "license_truck",
+            },
+        },
+        licenseRecordValues = {
+            -- License Information
+            ["252c4250da9421cbd"] = function(pedData, ctx)
+                return pedData[ctx.is_valid] and "VALID" or "SUSPENDED"
+            end,
+            ["878766af4964853a7"] = function(pedData, ctx)
+                return pedData[ctx.is_valid] and "VALID" or "EXPIRED"
+            end,
+            ["_54iz1scv7"] = function(pedData)
+                return os.date("%m/%d/%Y", os.time() + (60 * 60 * 24 * 365)) -- +1 year
+            end,
+            -- Civilian Information
+            ["first"] = "first_name",
+            ["last"] = "last_name",
+            ["mi"] = "", -- No M.I. mapped
+            ["dob"] = "dob",
+            ["age"] = function(pedData)
+                local birth = os.date("*t", os.time({year=tonumber(pedData.dob:sub(7,10)), month=tonumber(pedData.dob:sub(1,2)), day=tonumber(pedData.dob:sub(4,5))}))
+                local now = os.date("*t")
+                local age = now.year - birth.year
+                if now.month < birth.month or (now.month == birth.month and now.day < birth.day) then
+                    age = age - 1
+                end
+                return tostring(age)
+            end,
+            ["sex"] = "gender",
+            ["residence"] = "address",
+            ["zip"] = "postalCode",
         }
     }
 

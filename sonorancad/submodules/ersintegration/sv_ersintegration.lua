@@ -104,6 +104,18 @@ if pluginConfig.enabled then
         end
         return replaceValues
     end
+
+    function generateLicenseReplaceValues(pedData, valueMap, extraContext)
+        local result = {}
+        for cadKey, ersKeyOrFunc in pairs(valueMap) do
+            if type(ersKeyOrFunc) == "string" then
+                result[cadKey] = pedData[ersKeyOrFunc]
+            elseif type(ersKeyOrFunc) == "function" then
+                result[cadKey] = ersKeyOrFunc(pedData, extraContext)
+            end
+        end
+        return result
+    end
     --[[
         911 CALL CREATION
     ]]
@@ -206,6 +218,7 @@ if pluginConfig.enabled then
             debugPrint("Ped " .. pedData.FirstName .. " " .. pedData.LastName .. " already processed. Skipping 911 call.")
             return
         end
+        -- CIVILIAN RECORD
         local data = {
             ['user'] = '00000000-0000-0000-0000-000000000000',
             ['useDictionary'] = true,
@@ -222,6 +235,18 @@ if pluginConfig.enabled then
                 debugPrint("Failed to extract recordId from response: " .. response)
             end
         end)
+        -- LICENSE RECORD
+        for _, v in pairs (pluginConfig.customRecords.licenseTypeConfigs) do
+            if pedData[v.license] then
+                local licenseData = {
+                    ['user'] = '00000000-0000-0000-0000-000000000000',
+                    ['useDictionary'] = true,
+                    ['recordTypeId'] = pluginConfig.customRecords.licenseRecordId
+                }
+                licenseData.replaceValues = generateReplaceValues(pedData, pluginConfig.customRecords.licenseRecordValues, v)
+                licenseData.replaceValues[pluginConfig.customRecords.licenseTypeField] = v.type
+            end
+        end
     end)
     AddEventHandler('SonoranCAD::ErsIntegration::BuildVehs', function(vehData)
         local data = {
