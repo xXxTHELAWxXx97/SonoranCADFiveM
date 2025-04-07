@@ -31,7 +31,7 @@ local config = {
             ["dob"] = "DOB",
             ["sex"] = "Gender",
             ["residence"] = function(pedData)
-                return pedData.Address .. " " .. pedData.City .. ", " .. pedData.State
+                return pedData.Address .. " " .. pedData.City
             end,
             ["zip"] = "Zip",
             ["phone"] = "Phone",

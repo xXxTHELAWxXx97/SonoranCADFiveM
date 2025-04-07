@@ -163,6 +163,10 @@ if pluginConfig.enabled then
                 if pluginConfig.autoAddCall then
                     local callId = processedCalloutAccepted[uniqueKey]
                     local unit = exports['sonorancad']:GetUnitByPlayerId(source)
+                    if not unit then
+                        debugPrint("Unit not found for player ID: " .. source)
+                        return
+                    end
                     local unitId = unit.data.apiIds[0]
                     local data = {
                         ['serverId'] = Config.serverId,
@@ -177,7 +181,12 @@ if pluginConfig.enabled then
                 debugPrint("Processing callout " .. calloutData.calloutId .. " for emergency call.")
                 local callCode = pluginConfig.callCodes[calloutData.CalloutName] or ""
                 local unit = exports['sonorancad']:GetUnitByPlayerId(source)
-                local unitId = unit.data.apiIds[0]
+                local unitId = ""
+                if not unit then
+                    debugPrint("Unit not found for player ID: " .. source)
+                else
+                    unitId = unit.data.apiIds[0]
+                end
                 local data = {
                     ['serverId'] = Config.serverId,
                     ['origin'] = 0,
@@ -190,7 +199,7 @@ if pluginConfig.enabled then
                     ['code'] = callCode,
                     ['description'] = calloutData.Description,
                     ['units'] = {unitId},
-                    ['notes'] = generateCallNote(calloutData), -- required
+                    ['notes'] = {}, -- required
                     ['metaData'] = {
                         ['x'] = calloutData.Coordinates.x,
                         ['y'] = calloutData.Coordinates.y
