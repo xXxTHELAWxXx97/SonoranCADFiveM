@@ -13,9 +13,11 @@ if pluginConfig.enabled then
     RegisterNetEvent('SonoranCAD::ErsIntegration::BuildChars')
     RegisterNetEvent('SonoranCAD::ErsIntegration::BuildVehs')
     registerApiType('SET_AVAILABLE_CALLOUTS', 'emergency')
+    registerApiType('NEW_CHARACTER', 'civilian')
     local processedCalloutOffered = {}
     local processedCalloutAccepted = {}
     local processedPedData = {}
+    local processedVehData = {}
     local ersCallouts = {}
     --[[
     @function generateUniqueCalloutKey
@@ -48,6 +50,16 @@ if pluginConfig.enabled then
             pedData.FirstName,
             pedData.LastName,
             pedData.Address
+        )
+    end
+
+    local function generateUniqueVehDataKey(vehData)
+        return string.format(
+            "%s_%s_%s_%s",
+            vehData.license_plate,
+            vehData.model,
+            vehData.color,
+            vehData.build_year
         )
     end
     --[[
@@ -129,7 +141,7 @@ if pluginConfig.enabled then
             local caller = calloutData.FirstName .. " " .. calloutData.LastName
             local location = calloutData.StreetName
             local description = calloutData.Description
-            local postal = calloutData.Postal
+            local postal = exports['nearest-postal']:getPostalServer({calloutData.Coordinates.x, calloutData.Coordinates.y}).code
             local plate = ""
             if calloutData.VehiclePlate ~= nil then
                 plate = calloutData.VehiclePlate
@@ -162,12 +174,12 @@ if pluginConfig.enabled then
                 debugPrint("Callout " .. calloutData.calloutId .. " already processed. Skipping emergency call... adding new units")
                 if pluginConfig.autoAddCall then
                     local callId = processedCalloutAccepted[uniqueKey]
-                    local unit = exports['sonorancad']:GetUnitByPlayerId(source)
-                    if not unit then
+                    local unit = GetUnitByPlayerId(source)
+                    if unit == nil then
                         debugPrint("Unit not found for player ID: " .. source)
                         return
                     end
-                    local unitId = unit.data.apiIds[0]
+                    local unitId = unit.data.apiIds[1]
                     local data = {
                         ['serverId'] = Config.serverId,
                         ['callId'] = callId,
@@ -180,12 +192,12 @@ if pluginConfig.enabled then
             else
                 debugPrint("Processing callout " .. calloutData.calloutId .. " for emergency call.")
                 local callCode = pluginConfig.callCodes[calloutData.CalloutName] or ""
-                local unit = exports['sonorancad']:GetUnitByPlayerId(source)
+                local unit = GetUnitByPlayerId(source)
                 local unitId = ""
-                if not unit then
+                if unit == nil then
                     debugPrint("Unit not found for player ID: " .. source)
                 else
-                    unitId = unit.data.apiIds[0]
+                    unitId = unit.data.apiIds[1]
                 end
                 local data = {
                     ['serverId'] = Config.serverId,
@@ -193,7 +205,7 @@ if pluginConfig.enabled then
                     ['status'] = 1,
                     ['priority'] = pluginConfig.callPriority,
                     ['block'] = calloutData.Postal,
-                    ['postal'] = calloutData.Postal,
+                    ['postal'] = exports['nearest-postal']:getPostalServer({calloutData.Coordinates.x, calloutData.Coordinates.y}).code,
                     ['address'] = calloutData.StreetName,
                     ['title'] = calloutData.CalloutName,
                     ['code'] = callCode,
@@ -224,7 +236,7 @@ if pluginConfig.enabled then
     AddEventHandler('SonoranCAD::ErsIntegration::BuildChars', function(pedData)
         local uniqueKey = generateUniquePedDataKey(pedData)
         if processedPedData[uniqueKey] then
-            debugPrint("Ped " .. pedData.FirstName .. " " .. pedData.LastName .. " already processed. Skipping 911 call.")
+            debugPrint("Ped " .. pedData.FirstName .. " " .. pedData.LastName .. " already processed.")
             return
         end
         -- CIVILIAN RECORD
@@ -232,16 +244,18 @@ if pluginConfig.enabled then
             ['user'] = '00000000-0000-0000-0000-000000000000',
             ['useDictionary'] = true,
             ['recordTypeId'] = pluginConfig.customRecords.civilianRecordID,
+            ['replaceValues'] = {}
         }
         data.replaceValues = generateReplaceValues(pedData, pluginConfig.customRecords.civilianValues)
-        performApiRequest({data}, 'NEW_RECORD', function(response)
-            local recordId = response:match("ID: {?(%w+)}?")
+        performApiRequest({data}, 'NEW_CHARACTER', function(response)
+            response = json.decode(response)
+            local recordId = response.id
             if recordId then
                 -- Save the recordId in the processedPedData table using the unique key
                 processedPedData[uniqueKey] = recordId
                 debugPrint("Record ID " .. recordId .. " saved for unique key: " .. uniqueKey)
             else
-                debugPrint("Failed to extract recordId from response: " .. response)
+                debugPrint("Failed to extract recordId from response: " .. json.encode(response))
             end
         end)
         -- LICENSE RECORD
@@ -254,12 +268,17 @@ if pluginConfig.enabled then
                 }
                 licenseData.replaceValues = generateReplaceValues(pedData, pluginConfig.customRecords.licenseRecordValues, v)
                 licenseData.replaceValues[pluginConfig.customRecords.licenseTypeField] = v.type
+                performApiRequest({licenseData}, 'NEW_RECORD', function(_)
+                end)
             end
-            performApiRequest({licenseData}, 'NEW_RECORD', function(_)
-            end)
         end
     end)
     AddEventHandler('SonoranCAD::ErsIntegration::BuildVehs', function(vehData)
+        local uniqueKey = generateUniqueVehDataKey(vehData)
+        if processedVehData[uniqueKey] then
+            debugPrint("Vehicle " .. vehData.model .. " " .. pedData.license_plate .. " already processed.")
+            return
+        end
         local data = {
             ['user'] = '00000000-0000-0000-0000-000000000000',
             ['useDictionary'] = true,
@@ -267,13 +286,14 @@ if pluginConfig.enabled then
         }
         data.replaceValues = generateReplaceValues(vehData, pluginConfig.customRecords.vehicleRegistrationValues)
         performApiRequest({data}, 'NEW_RECORD', function(response)
-            local recordId = response:match("ID: {?(%w+)}?")
+            response = json.decode(response)
+            local recordId = response.id
             if recordId then
                 -- Save the recordId in the processedPedData table using the unique key
-                processedPedData[uniqueKey] = recordId
+                processedVehData[uniqueKey] = recordId
                 debugPrint("Record ID " .. recordId .. " saved for unique key: " .. uniqueKey)
             else
-                debugPrint("Failed to extract recordId from response: " .. response)
+                debugPrint("Failed to extract recordId from response: " .. json.encode(response))
             end
         end)
     end)

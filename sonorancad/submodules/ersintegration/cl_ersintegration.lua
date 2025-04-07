@@ -6,7 +6,7 @@
     Description: Integrates Knight ERS callouts to SonoranCAD
 ]]
 CreateThread(function() Config.LoadPlugin("ersintegration", function(pluginConfig)
-    RegisterNetEvent('night_ers:ERS_GetPedDataFromServer_cb', function(data)
+    RegisterNetEvent('night_ers:ERS_GetPedDataFromServer_cb', function(_, data)
         TriggerServerEvent('SonoranCAD::ErsIntegration::BuildChars', data)
     end)
     RegisterNetEvent('night_ers:receiveVehicleInformation', function(_, data)

@@ -30,9 +30,7 @@ local config = {
             ["last"] = "LastName",
             ["dob"] = "DOB",
             ["sex"] = "Gender",
-            ["residence"] = function(pedData)
-                return pedData.Address .. " " .. pedData.City
-            end,
+            ["residence"] = "Address",
             ["zip"] = "Zip",
             ["phone"] = "Phone",
             ["skin"] = "Nationality",
