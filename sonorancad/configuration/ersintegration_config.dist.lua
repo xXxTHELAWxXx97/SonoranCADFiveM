@@ -152,7 +152,14 @@ local config = {
             ["sex"] = "gender",
             ["residence"] = "address",
             ["zip"] = "postalCode",
-        }
+        },
+        boloRecordID = 3, -- Record ID for BOLO records
+        boloRecordValues = {
+            ['_olgxdruc3'] = 'bolo_description'
+        },
+        warrantRecordID = 2, -- Record ID for warrant records
+        warrantDescription = '_avb6wvgyi', -- Field ID for warrant description
+        warrantFlags = '_hlshajq0f' -- Field ID for warrant flags
     }
 
 }
