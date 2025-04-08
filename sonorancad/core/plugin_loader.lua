@@ -34,6 +34,8 @@ function CheckForPluginUpdate(name)
                     warnLog(("Failed to get a valid response for %s. Skipping."):format(k))
                     debugLog(("Raw output for %s: %s"):format(k, data))
                 end
+            elseif remote.submoduleConfigs[name] == nil and plugin.enabled then
+                warnLog(("Failed to check submodule updates for %s: submodule was not found in the updater manifest... if this is a custom submodule you can ignore this warning"):format(name))
             elseif (remote.submoduleConfigs[name].version ~= nil and plugin.configVersion ~= nil) then
                 local configCompare = compareVersions(remote.submoduleConfigs[name].version, plugin.configVersion)
                 if configCompare.result and not Config.debugMode then
