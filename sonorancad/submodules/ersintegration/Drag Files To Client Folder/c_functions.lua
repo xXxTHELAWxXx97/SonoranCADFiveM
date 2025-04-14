@@ -4,17 +4,17 @@ QBCore = nil
 ESX = nil
 
 Citizen.CreateThread(function()
-    if Config.Enable_QBCore_Permissions.Check_By_Job or Config.Enable_QBCore_Permissions.Check_By_Permissions then
+    if Config.Enable_QBCore_Permissions.Check_By_Job or Config.Enable_QBCore_Permissions.Check_By_Permissions or (Config.GearData.Enable_Gear_Permissions and Config.GearData.Enable_QBCore_Permissions.Check_By_Job or Config.GearData.Enable_QBCore_Permissions.Check_By_Permissions) then
         QBCore = exports["qb-core"]:GetCoreObject()
     end
 
-    if Config.Enable_ESX_Permissions.Check_By_Job or Config.Enable_ESX_Permissions.Check_By_Permissions then
+    if Config.Enable_ESX_Permissions.Check_By_Job or Config.Enable_ESX_Permissions.Check_By_Permissions or (Config.GearData.Enable_Gear_Permissions and Config.GearData.Enable_ESX_Permissions.Check_By_Job or Config.GearData.Enable_ESX_Permissions.Check_By_Permissions) then
         ESX = exports["es_extended"]:getSharedObject()
     end
 end)
 
 function OnIsOfferedCallout(calloutdata)
-    TriggerServerEvent('SonoranCAD::ErsIntegration::CalloutOffered', calloutdata)
+    TriggerServerEvent('SonoranCAD::ErsIntegration::CalloutAccepted', calloutdata)
     -- Add your code here. Keep in mind they are offered a callout. It is possible they will not accept the callout.
 
     -- if Config.Debug then
@@ -45,7 +45,7 @@ end
 
 function OnEndedACallout() -- Contains no callout data.
     -- Add your code here. This is triggered right before the entities are deleted or callout is cancelled serverside. This code will execute first.
-
+    
 end
 
 RegisterNetEvent('SonoranCAD::ErsIntegration::BuildCallout', function(callout)
@@ -61,61 +61,45 @@ RegisterNetEvent('SonoranCAD::ErsIntegration::BuildCallout', function(callout)
     Config.Callouts[newCalloutID].PedChanceToSurrender = callout.data.PedChanceToSurrender
 end)
 
-function OnNPCGivesGear(data, clothingIndex)
-    -- Adjust this to another framework for example if you like.
-    local clothingData, healthData = data.ClothingData, data.HealthData
-    local weaponData, ItemData, AmmoData
+function OnNPCGivesGear(data)
+    local clothingData, weaponData, healthData = data.clothingData, data.weaponData, data.healthData
 
-    if QBCore or ESX then
-        --from gear-config-framework
-        ItemData = data.ItemData
-        AmmoData = data.AmmoData
-    else
-        weaponData = data.WeaponData
-    end
-
-    -- Select random defined outfit from ClothingData.
-
-    -- local randomClothingIndex = math.random(#clothingData)
-    local indexFromJSToLua = clothingIndex + 1
-    local newClothingData = clothingData[indexFromJSToLua]
-    local isModelAMultiplayerModel = (newClothingData.modelName == "mp_m_freemode_01" or newClothingData.modelName == "mp_f_freemode_01")
-
-    -- Ped model
+    -- Player ped model
+    local isModelAMultiplayerModel = (clothingData.modelName == "mp_m_freemode_01" or clothingData.modelName == "mp_f_freemode_01")
     local pedEntityModelHash = GetEntityModel(PlayerPedId())
     if isModelAMultiplayerModel then
         if Config.GearData.ForceMPPedWhenPlayerIsNotAnMPPed then
-            if pedEntityModelHash ~= GetHashKey(newClothingData.modelName) then
-                local newModel = GetHashKey(newClothingData.modelName)
+            if pedEntityModelHash ~= GetHashKey(clothingData.modelName) then
+                local newModel = GetHashKey(clothingData.modelName)
                 RequestModel(newModel)
-
+                
                 local attempts = 0
                 while not HasModelLoaded(newModel) and attempts < 10 do
                     Citizen.Wait(500)
                     attempts = attempts + 1
                 end
-
+                
                 if HasModelLoaded(newModel) then
-
+                    
                     SetPlayerModel(PlayerId(), newModel)
                     SetPedComponentVariation(PlayerPedId(), 0, 0, 0, 2)
-
+                    
                     pedEntityModelHash = GetEntityModel(PlayerPedId())
-
+                    
                     SetModelAsNoLongerNeeded(newModel)
                     Citizen.Wait(500)
-
+                    
                     -- Confirm the model is set correctly
                     attempts = 0
-                    while (pedEntityModelHash ~= GetHashKey(newClothingData.modelName)) and attempts < 5 do
+                    while (pedEntityModelHash ~= GetHashKey(clothingData.modelName)) and attempts < 5 do
                         SetPlayerModel(PlayerId(), newModel)
                         Citizen.Wait(500)
                         pedEntityModelHash = GetEntityModel(PlayerPedId())
                         attempts = attempts + 1
                     end
-
+                    
                     SetPedDefaultComponentVariation(PlayerPedId())
-
+                    
                     if Config.Debug then
                         print("Set player model to: " .. newModel)
                     end
@@ -125,21 +109,23 @@ function OnNPCGivesGear(data, clothingIndex)
             end
         end
     else
-        local model = newClothingData.modelName
-        if IsModelInCdimage(model) and IsModelValid(model) then
-            RequestModel(model)
-            while not HasModelLoaded(model) do
-                Wait(0)
+        if Config.GearData.EnableSetClothing then
+            local model = clothingData.modelName
+            if IsModelInCdimage(model) and IsModelValid(model) then
+                RequestModel(model)
+                while not HasModelLoaded(model) do
+                    Wait(0)
+                end
+                SetPlayerModel(PlayerId(), model)
+                SetModelAsNoLongerNeeded(model)
             end
-            SetPlayerModel(PlayerId(), model)
-            SetModelAsNoLongerNeeded(model)
         end
     end
 
     -- Clothes
     if Config.GearData.EnableSetClothing then
         if isModelAMultiplayerModel then
-            ERS_SetOutfit(PlayerPedId(), newClothingData)
+            ERS_SetOutfit(PlayerPedId(), clothingData)
             if Config.Debug then
                 print("Setting outfit...")
             end
@@ -148,24 +134,7 @@ function OnNPCGivesGear(data, clothingIndex)
 
     -- Weapons
     if Config.GearData.EnableGiveWeapons then
-        if QBCore or ESX then
-            --Executed in s_functions
-            TriggerServerEvent("night_ers:giveItems", ItemData, AmmoData)
-        else
-            -- Default GTA V Weapon Giving
-            for k, v in pairs(weaponData) do
-                local playerPed = PlayerPedId()
-                GiveWeaponToPed(playerPed, GetHashKey(v.modelName), v.ammo, false, true)
-                if #v.componentList > 0 then
-                    for i, component in pairs(v.componentList) do
-                        GiveWeaponComponentToPed(playerPed, GetHashKey(v.modelName), GetHashKey(component))
-                        if Config.Debug then
-                            print("Set component "..component.." to given weapon "..v.modelName)
-                        end
-                    end
-                end
-            end
-        end
+        TriggerServerEvent(Config.EventPrefix..":setWeaponsAmmoComponents", weaponData)
     end
 
     -- Health and armor
@@ -175,7 +144,7 @@ function OnNPCGivesGear(data, clothingIndex)
         if healthData.Health then
             local entityHealth = GetEntityHealth(playerPed)
             local newHealth = math.min(entityHealth + healthData.Health, 200)
-
+            
             if newHealth ~= entityHealth then
                 SetEntityHealth(playerPed, newHealth)
             end
@@ -185,30 +154,11 @@ function OnNPCGivesGear(data, clothingIndex)
         if healthData.Armor then
             local entityArmor = GetPedArmour(playerPed)
             local newArmor = math.min(entityArmor + healthData.Armor, 200)
-
+            
             if newArmor ~= entityArmor then
                 SetPedArmour(playerPed, newArmor)
             end
         end
-    end
-end
-
-function OnNPCGivesAmmo(data) -- @UNUSED
-    local healthData = data.HealthData
-    -- Adjust this to another framework for example if you like.
-    local AmmoData
-
-    if QBCore or ESX then
-        --from gear-config-framework
-        AmmoData = data.AmmoData
-    else
-        weaponData = data.WeaponData
-    end
-
-    -- Weapons
-    if QBCore or ESX then
-        --Executed in s_functions
-        TriggerServerEvent("night_ers:giveAmmo", AmmoData)
     end
 end
 
@@ -226,7 +176,7 @@ function notify(notificationText, notificationDuration, notificationPosition, no
     DrawNotification(true, true)
 end
 
-function Draw3DText(x,y,z,text,scl)
+function Draw3DText(x,y,z,text,scl) 
     local onScreen,_x,_y=World3dToScreen2d(x,y,z)
     local px,py,pz=table.unpack(GetGameplayCamCoords())
     local dist = GetDistanceBetweenCoords(px,py,pz, x,y,z, 1)
@@ -273,15 +223,16 @@ end
 
 function LoadAnimDict(dict)
     RequestAnimDict(dict)
-    while (not HasAnimDictLoaded(dict)) do
+    while (not HasAnimDictLoaded(dict)) do        
         Citizen.Wait(1)
     end
 end
 
-function PlaySound(file, vol)
+function PlaySound(folder, file, vol)
     SendNUIMessage({
         transactionType     = 'playSound',
-        transactionFile     = file,
+        transactionFolder   = folder,
+        transactionFile     = file, 
         transactionVolume   = vol
     })
 end
@@ -377,10 +328,10 @@ function OnSendDispatchMessage(message)
         -- subjectdescription = PersonalData.userCurrentStreetName.." at postal: "..PersonalData.userCurrentPostal,
 
         footer = "Emergency Response Simulator - by Nights Software in collaboration with London Studios",
-        footericon = "https://i.imgur.com/cHYaWf3.png",
+        footericon = "https://assets.ea-rp.com/img/ERS_Logo.png",
 
-        thumbnail = "https://i.imgur.com/rU16IFe.png",
-        image = "https://i.imgur.com/QYf36dB.png",
+        thumbnail = "https://assets.ea-rp.com/img/ERS_Logo_Sq.png",
+        image = "https://assets.ea-rp.com/img/ERS_Logo.png",
 
         discordwebhookurltype = "dispatch",
         systemname = "Dispatch - System",
