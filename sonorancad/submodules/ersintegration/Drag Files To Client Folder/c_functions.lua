@@ -45,7 +45,6 @@ end
 
 function OnEndedACallout() -- Contains no callout data.
     -- Add your code here. This is triggered right before the entities are deleted or callout is cancelled serverside. This code will execute first.
-    
 end
 
 RegisterNetEvent('SonoranCAD::ErsIntegration::BuildCallout', function(callout)
