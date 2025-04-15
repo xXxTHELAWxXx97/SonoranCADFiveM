@@ -14,7 +14,7 @@ Citizen.CreateThread(function()
 end)
 
 function OnIsOfferedCallout(calloutdata)
-    TriggerServerEvent('SonoranCAD::ErsIntegration::CalloutAccepted', calloutdata)
+    TriggerServerEvent('SonoranCAD::ErsIntegration::CalloutOffered', calloutdata)
     -- Add your code here. Keep in mind they are offered a callout. It is possible they will not accept the callout.
 
     -- if Config.Debug then
