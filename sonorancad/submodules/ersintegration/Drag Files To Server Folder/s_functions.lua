@@ -2,11 +2,11 @@ QBCore = nil
 ESX = nil
 
 Citizen.CreateThread(function()
-    if Config.Enable_QBCore_Permissions.Check_By_Job or Config.Enable_QBCore_Permissions.Check_By_Permissions then
+    if Config.Enable_QBCore_Permissions.Check_By_Job or Config.Enable_QBCore_Permissions.Check_By_Permissions or (Config.GearData.Enable_Gear_Permissions and Config.GearData.Enable_QBCore_Permissions.Check_By_Job or Config.GearData.Enable_QBCore_Permissions.Check_By_Permissions) then
         QBCore = exports["qb-core"]:GetCoreObject()
     end
 
-    if Config.Enable_ESX_Permissions.Check_By_Job or Config.Enable_ESX_Permissions.Check_By_Permissions then
+    if Config.Enable_ESX_Permissions.Check_By_Job or Config.Enable_ESX_Permissions.Check_By_Permissions or (Config.GearData.Enable_Gear_Permissions and Config.GearData.Enable_ESX_Permissions.Check_By_Job or Config.GearData.Enable_ESX_Permissions.Check_By_Permissions) then
         ESX = exports["es_extended"]:getSharedObject()
     end
 end)
@@ -18,59 +18,6 @@ function OnToggleShift(src, isOnShift, serviceType)
     -- Add your code here.
     -- print(src, isOnShift, serviceType)
 end
-
---============ FRAMEWORKS ============--
-
-RegisterServerEvent("night_ers:giveItems", function(ItemData, AmmoData)
-    local src = source
-    if QBCore then
-        local Player = QBCore.Functions.GetPlayer(src)
-        for k, v in pairs(ItemData) do
-            if exports['qb-inventory']:CanAddItem(src, v.itemName, v.count) then
-                exports['qb-inventory']:AddItem(src, v.itemName, v.count)
-            end
-        end
-        if AmmoData then
-            for k, v in pairs(AmmoData) do
-                if exports['qb-inventory']:CanAddItem(src, v.itemName, v.count) then
-                    exports['qb-inventory']:AddItem(src, v.itemName, v.count)
-                end
-            end
-        end
-    elseif ESX then
-        local xPlayer = ESX.GetPlayerFromId(src)
-        for k, v in pairs(ItemData) do
-            if xPlayer.canCarryItem(v.itemName, v.count) then
-                xPlayer.addInventoryItem(v.itemName, v.count)
-            end
-        end
-        if AmmoData then
-            for k, v in pairs(AmmoData) do
-                if xPlayer.canCarryItem(v.itemName, v.count) then
-                    xPlayer.addInventoryItem(v.itemName, v.count)
-                end
-            end
-        end
-    end
-    -- Add other or more logic here...
-end)
-
-function cloneWithoutFunctions(tbl)
-    local copy = {}
-    for key, value in pairs(tbl) do
-        if type(value) == "table" then
-            copy[key] = cloneWithoutFunctions(value)
-        elseif type(value) ~= "function" then
-            copy[key] = value
-        end
-    end
-    return copy
-end
-
-exports('getCallouts', function()
-    local jsonReadyTable = cloneWithoutFunctions(Config.Callouts)
-    return jsonReadyTable
-end)
 
 exports('createCallout', function(callout)
     local newCalloutID = callout.id .. '-' .. os.time()
@@ -89,23 +36,75 @@ exports('createCallout', function(callout)
     return returnData
 end)
 
-RegisterServerEvent("night_ers:giveAmmo", function(AmmoData)
+--============ GIVE WEAPONS & AMMO (GEAR) ============--
+
+RegisterServerEvent(Config.EventPrefix..":setWeaponsAmmoComponents")
+AddEventHandler(Config.EventPrefix..":setWeaponsAmmoComponents", function(weaponData) 
     local src = source
+
     if QBCore then
         local Player = QBCore.Functions.GetPlayer(src)
-        if AmmoData then
-            for k, v in pairs(AmmoData) do
-                if exports['qb-inventory']:CanAddItem(src, v.itemName, v.count) then
-                    exports['qb-inventory']:AddItem(src, v.itemName, v.count)
+        if not Player then 
+            DebugPrint("ERROR: Could not find QBCore Player with ID: "..src)
+            return 
+        end
+        if weaponData then
+            for k, v in pairs(weaponData) do
+                if exports['qb-inventory']:CanAddItem(src, v.weaponName, 1) then
+                    exports['qb-inventory']:AddItem(src, v.weaponName, 1)
+
+                    -- Add ammo for this weapon
+                    if v.ammoType and v.ammoCount then
+                        if exports['qb-inventory']:CanAddItem(src, v.ammoType, v.ammoCount) then
+                            exports['qb-inventory']:AddItem(src, v.ammoType, v.ammoCount)
+                        end
+                    end
+
+                    -- Add weapon attachments (components)
+                    for _, component in pairs(v.componentList) do
+                        if exports['qb-inventory']:CanAddItem(src, component, 1) then
+                            exports['qb-inventory']:AddItem(src, component, 1)
+                        end
+                    end
                 end
             end
         end
     elseif ESX then
         local xPlayer = ESX.GetPlayerFromId(src)
-        if AmmoData then
-            for k, v in pairs(AmmoData) do
-                if xPlayer.canCarryItem(v.itemName, v.count) then
-                    xPlayer.addInventoryItem(v.itemName, v.count)
+        if not xPlayer then 
+            DebugPrint("ERROR: Could not find xPlayer with ID: "..src)
+            return 
+        end
+        if weaponData then
+            for k, v in pairs(weaponData) do
+                if xPlayer.hasWeapon(v.weaponName) then
+                    xPlayer.removeWeapon(v.weaponName)
+                    xPlayer.addWeapon(v.weaponName, v.ammoCount)
+                    xPlayer.addWeaponAmmo(v.weaponName, v.ammoCount)
+                else
+                    xPlayer.addWeapon(v.weaponName, v.ammoCount)
+                end
+
+                -- Add weapon attachments (components)
+                for _, component in pairs(v.componentList) do
+                    if xPlayer.hasWeaponComponent(v.weaponName, component) then
+                        xPlayer.removeWeaponComponent(v.weaponName, component)
+                        xPlayer.addWeaponComponent(v.weaponName, component)
+                    else
+                        xPlayer.addWeaponComponent(v.weaponName, component)
+                    end
+                end
+            end
+        end
+    else
+        -- Default GTA V Weapons
+        for k, v in pairs(weaponData) do
+            local playerPed = GetPlayerPed(src)
+            GiveWeaponToPed(playerPed, GetHashKey(v.weaponName), v.ammoCount, false, true)
+            if #v.componentList > 0 then
+                for i, component in pairs(v.componentList) do
+                    GiveWeaponComponentToPed(playerPed, GetHashKey(v.weaponName), GetHashKey(component)) 
+                    DebugPrint("[^4DEBUG ^7] Set component "..component.." to given weapon "..v.weaponName)
                 end
             end
         end
@@ -113,9 +112,9 @@ RegisterServerEvent("night_ers:giveAmmo", function(AmmoData)
     -- Add other or more logic here...
 end)
 
---============ PERMISSIONS FOR SERVICES ============--
+--============ PERMISSIONS FOR SERVICES ============-- 
 
-function CheckIsPlayerAllowedToPlayServiceByRoleOrGroups(source, roleOrGroups) -- to toggle shift
+function CheckIsPlayerAllowedToPlayServiceByRoleOrGroups(source, rolesOrGroups) -- to toggle shift
     local permission = false
 
     -- If this is enabled, everyone can play any service at any time.
@@ -125,7 +124,7 @@ function CheckIsPlayerAllowedToPlayServiceByRoleOrGroups(source, roleOrGroups) -
 
     -- Discord API Permissions
     if Config.Enable_Night_DiscordApi_Permissions then
-        local isPermitted = exports.night_discordapi:IsMemberPartOfAnyOfTheseRoles(source, roleOrGroups)
+        local isPermitted = exports.night_discordapi:IsMemberPartOfAnyOfTheseRoles(source, rolesOrGroups)
         if isPermitted then
             permission = true
         end
@@ -133,7 +132,7 @@ function CheckIsPlayerAllowedToPlayServiceByRoleOrGroups(source, roleOrGroups) -
 
     -- Ace Permissions
     if Config.Enable_Ace_Permissions then
-        for _, roleOrGroup in pairs(roleOrGroups) do
+        for _, roleOrGroup in pairs(rolesOrGroups) do
             if IsPlayerAceAllowed(source, roleOrGroup) then
                 permission = true
                 break
@@ -146,7 +145,7 @@ function CheckIsPlayerAllowedToPlayServiceByRoleOrGroups(source, roleOrGroups) -
         if ESX == nil then return print("You've enabled ESX job permissions, but the ESX framework has not been found...") end
         local xPlayer = ESX.GetPlayerFromId(source)
         if xPlayer then
-            for _, job in pairs(roleOrGroups) do
+            for _, job in pairs(rolesOrGroups) do
                 if xPlayer.job.name == job then
                     permission = true
                     break
@@ -160,7 +159,7 @@ function CheckIsPlayerAllowedToPlayServiceByRoleOrGroups(source, roleOrGroups) -
         if ESX == nil then return print("You've enabled ESX group permissions, but the ESX framework has not been found...") end
         local xPlayer = ESX.GetPlayerFromId(source)
         if xPlayer then
-            for _, group in pairs(roleOrGroups) do
+            for _, group in pairs(rolesOrGroups) do
                 if xPlayer.getGroup() == group then
                     permission = true
                     break
@@ -174,7 +173,7 @@ function CheckIsPlayerAllowedToPlayServiceByRoleOrGroups(source, roleOrGroups) -
         if QBCore == nil then return print("You've enabled QBCore job permissions, but the QBCore framework has not been found...") end
         local Player = QBCore.Functions.GetPlayer(source)
         if Player then
-            for _, job in pairs(roleOrGroups) do
+            for _, job in pairs(rolesOrGroups) do
                 if Player.PlayerData.job.name == job then
                     permission = true
                     break
@@ -188,7 +187,7 @@ function CheckIsPlayerAllowedToPlayServiceByRoleOrGroups(source, roleOrGroups) -
         if QBCore == nil then return print("You've enabled QBCore group permissions, but the QBCore framework has not been found...") end
         local Player = QBCore.Functions.GetPlayer(source)
         if Player then
-            for _, perm in pairs(roleOrGroups) do
+            for _, perm in pairs(rolesOrGroups) do
                 if QBCore.Functions.HasPermission(source, perm) then
                     permission = true
                 end
@@ -197,6 +196,93 @@ function CheckIsPlayerAllowedToPlayServiceByRoleOrGroups(source, roleOrGroups) -
     end
     return permission
 end
+
+--============ PERMISSIONS FOR GEAR LOADOUTS ============-- 
+
+function CheckIsPlayerAllowedToSelectGearByRoleOrGroups(source, rolesOrGroups) -- to toggle shift
+    local permission = false
+
+    -- If this is enabled, everyone can select any gear loadout/uniform.
+    if not Config.GearData.Enable_Gear_Permissions then
+        return true
+    end
+
+    -- Discord API Permissions
+    if Config.GearData.Enable_Night_DiscordApi_Permissions then
+        local isPermitted = exports.night_discordapi:IsMemberPartOfAnyOfTheseRoles(source, rolesOrGroups)
+        if isPermitted then
+            permission = true
+        end
+    end
+
+    -- Ace Permissions
+    if Config.GearData.Enable_Ace_Permissions then
+        for _, roleOrGroup in pairs(rolesOrGroups) do
+            if IsPlayerAceAllowed(source, roleOrGroup) then
+                permission = true
+                break
+            end
+        end
+    end
+
+    -- ESX Job Permissions
+    if Config.GearData.Enable_ESX_Permissions.Check_By_Job then
+        if ESX == nil then return print("You've enabled ESX job permissions, but the ESX framework has not been found...") end
+        local xPlayer = ESX.GetPlayerFromId(source)
+        if xPlayer then
+            for _, job in pairs(rolesOrGroups) do
+                if xPlayer.job.name == job then
+                    permission = true
+                    break
+                end
+            end
+        end
+    end
+
+    -- ESX Permission Based
+    if Config.GearData.Enable_ESX_Permissions.Check_By_Permissions then
+        if ESX == nil then return print("You've enabled ESX group permissions, but the ESX framework has not been found...") end
+        local xPlayer = ESX.GetPlayerFromId(source)
+        if xPlayer then
+            for _, group in pairs(rolesOrGroups) do
+                if xPlayer.getGroup() == group then
+                    permission = true
+                    break
+                end
+            end
+        end
+    end
+
+    -- QBCore Job Based
+    if Config.GearData.Enable_QBCore_Permissions.Check_By_Job then
+        if QBCore == nil then return print("You've enabled QBCore job permissions, but the QBCore framework has not been found...") end
+        local Player = QBCore.Functions.GetPlayer(source)
+        if Player then
+            for _, job in pairs(rolesOrGroups) do
+                if Player.PlayerData.job.name == job then
+                    permission = true
+                    break
+                end
+            end
+        end
+    end
+
+    -- QBCore Permission based
+    if Config.GearData.Enable_QBCore_Permissions.Check_By_Permissions then
+        if QBCore == nil then return print("You've enabled QBCore group permissions, but the QBCore framework has not been found...") end
+        local Player = QBCore.Functions.GetPlayer(source)
+        if Player then
+            for _, perm in pairs(rolesOrGroups) do
+                if QBCore.Functions.HasPermission(source, perm) then
+                    permission = true
+                end
+            end
+        end
+    end
+    return permission
+end
+
+--============ OTHER FUNCTIONS ============--
 
 function GetCustomPlayerName(id) -- Used for shift data only to represent the "Officer/Firefighter/Medics name or callsign"
     local src = tonumber(id)
@@ -239,17 +325,17 @@ end
 
 -- Randomly generated NPC personal data
 
-function GenerateRandomLicenseResult()
+function GenerateRandomLicenseResult()  
     -- Calculate total weight
     local totalWeight = 0
     for _, result in pairs(Config.RandomLicenseResults) do
         totalWeight = totalWeight + result.Chance
     end
-
+    
     -- Generate random number based on total weight
     local chance = math.random(1, totalWeight)
     local runningTotal = 0
-
+    
     -- Check each result against its proportional range
     for _, result in pairs(Config.RandomLicenseResults) do
         runningTotal = runningTotal + result.Chance
@@ -265,7 +351,7 @@ end
 function GenerateRandomFlagsOrMarkers()
     local FlagsOrMarkers = {}
     local FLAG_OR_MARKER_CHANCE = Config.ChanceToHaveRecords
-
+    
     -- Initial check if person should have any flags or markers at all
     if math.random(1, 100) > FLAG_OR_MARKER_CHANCE then
         return {
@@ -286,7 +372,7 @@ function GenerateRandomFlagsOrMarkers()
             active_warrant = false,
         }
     end
-
+    
     -- Helper function to determine if warrant should be active
     local function shouldHaveFlagOrMarker()
         return math.random(1, 100) <= FLAG_OR_MARKER_CHANCE
@@ -308,7 +394,7 @@ function GenerateRandomFlagsOrMarkers()
             return table.concat(descriptions, ", ")
         end
     end
-
+    
     FlagsOrMarkers = {
         armed_and_dangerous = shouldHaveFlagOrMarker(),
         assault = shouldHaveFlagOrMarker(),
@@ -343,13 +429,13 @@ function GenerateRandomDOB()
     -- Define the range of years
     local minYear = 1970
     local maxYear = 2005
-
+    
     -- Generate a random year within the range
     local year = math.random(minYear, maxYear)
-
+    
     -- Generate a random month (1-12)
     local month = math.random(1, 12)
-
+    
     -- Generate a random day within the month
     local maxDay
     if month == 2 then
@@ -367,10 +453,10 @@ function GenerateRandomDOB()
         -- Months with 31 days
         maxDay = 31
     end
-
+    
     -- Generate a random day
     local day = math.random(1, maxDay)
-
+    
     -- Determine the format and return the generated date of birth
     if Config.DOBFormat == "en" then
         return string.format("%02d-%02d-%04d", day, month, year)
@@ -411,24 +497,28 @@ end
 --     -- return postalCode
 -- end
 
-function GenerateRandomStateCityPostalCodeRangeAndAddress()
+function GenerateRandomStateCityPostalCodeRangeAndAddress()    
     -- Error handling for empty/nil tables
     if not Config.RandomStates or #Config.RandomStates == 0 then
+        DebugPrint("^1ERROR ^7Config.RandomStates is empty or nil")
         return nil, nil, nil, nil, nil, nil
     end
 
     local country = Config.RandomStates[math.random(#Config.RandomStates)]
     if not country or not country.States or #country.States == 0 then
+        DebugPrint("^1ERROR ^7Country or States table is empty or nil")
         return nil, nil, nil, nil, nil, nil
     end
 
-    local randomState = country.States[math.random(#country.States)]
+    local randomState = country.States[math.random(#country.States)]    
     if not randomState or not randomState.Cities or #randomState.Cities == 0 then
+        DebugPrint("^1ERROR ^7RandomState or Cities table is empty or nil")
         return nil, nil, nil, nil, nil, nil
     end
 
-    local randomCity = randomState.Cities[math.random(#randomState.Cities)]
+    local randomCity = randomState.Cities[math.random(#randomState.Cities)] 
     if not randomCity or not randomCity.Addresses or #randomCity.Addresses == 0 then
+        DebugPrint("^1ERROR ^7RandomCity or Addresses table is empty or nil")
         return nil, nil, nil, nil, nil, nil
     end
 
@@ -436,7 +526,7 @@ function GenerateRandomStateCityPostalCodeRangeAndAddress()
     local randomPostalCode = math.random(randomCity.PostalCodeRange[1], randomCity.PostalCodeRange[2])
     local randomAddress = randomCity.Addresses[math.random(#randomCity.Addresses)]
     local randomAddressType = GenerateRandomAdressType()
-
+    
     -- Remove debug prints or make them conditional
     if Config.Debug then
         print(country.Country or "not found")
@@ -446,13 +536,13 @@ function GenerateRandomStateCityPostalCodeRangeAndAddress()
         print(randomAddress.Address or "not found")
         print(randomAddressType or "not found")
     end
-
+    
     -- Make sure we're returning the actual country name and address type in the correct order
-    return country.Country or "USA",
-           randomState.State or "San Andreas",
-           randomCity.City or "Los Santos",
-           tostring(randomPostalCode) or "12345",
-           randomAddress.Address or "123 Night St",
+    return country.Country or "USA", 
+           randomState.State or "San Andreas", 
+           randomCity.City or "Los Santos", 
+           tostring(randomPostalCode) or "12345", 
+           randomAddress.Address or "123 Night St", 
            randomAddressType -- This should be the property type, not the country
 end
 
@@ -500,7 +590,7 @@ end)
 function SendDiscordEmbedMessage(src, data)
     if Config.Enable_Discord_Webhooks then
         local webhookURL = "https://discord.com/api/webhooks/964210045220958251/2qzKEBdUceFxJ1Wt3OhmL6WbqP9AUJqrJjbtd0U31MFV8l9uOODvn7mfmsm5I3wxzE1d"
-        local webhooKType = data.discordwebhookurltype
+        local webhooKType = data.discordwebhookurltype 
         if webhooKType == nil then webhooKType = '' end
         if webhooKType == 'dispatch' then
             webhookURL = "https://discord.com/api/webhooks/964210045220958251/2qzKEBdUceFxJ1Wt3OhmL6WbqP9AUJqrJjbtd0U31MFV8l9uOODvn7mfmsm5I3wxzE1d"
@@ -537,10 +627,10 @@ function SendDiscordEmbedMessage(src, data)
                 },
                 ["footer"] = {
                     ["text"] = data.footer or "".." "..os.date("%Y").." | "..os.date("%d-%m-%Y at %H:%M:%S"),
-                    ["icon_url"] = data.footericon or "https://i.imgur.com/cHYaWf3.png"
+                    ["icon_url"] = data.footericon or "https://assets.ea-rp.com/img/ERS_Logo.png"
                 },
                 ["thumbnail"] = {
-                    ["url"] = data.thumbnail or "https://i.imgur.com/rU16IFe.png",
+                    ["url"] = data.thumbnail or "https://assets.ea-rp.com/img/ERS_Logo_Sq.png",
                 },
                 ["image"] = {
                     ["url"] = data.image or "" -- No url is no image, which is fine as well
