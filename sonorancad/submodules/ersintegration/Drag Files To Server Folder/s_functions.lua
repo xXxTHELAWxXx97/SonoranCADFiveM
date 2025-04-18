@@ -19,6 +19,23 @@ function OnToggleShift(src, isOnShift, serviceType)
     -- print(src, isOnShift, serviceType)
 end
 
+function cloneWithoutFunctions(tbl)
+    local copy = {}
+    for key, value in pairs(tbl) do
+        if type(value) == "table" then
+            copy[key] = cloneWithoutFunctions(value)
+        elseif type(value) ~= "function" then
+            copy[key] = value
+        end
+    end
+    return copy
+end
+
+exports('getCallouts', function()
+    local jsonReadyTable = cloneWithoutFunctions(Config.Callouts)
+    return jsonReadyTable
+end)
+
 exports('createCallout', function(callout)
     local newCalloutID = callout.id .. '-' .. os.time()
     Config.Callouts[newCalloutID] = Config.Callouts[callout.id]
@@ -39,14 +56,14 @@ end)
 --============ GIVE WEAPONS & AMMO (GEAR) ============--
 
 RegisterServerEvent(Config.EventPrefix..":setWeaponsAmmoComponents")
-AddEventHandler(Config.EventPrefix..":setWeaponsAmmoComponents", function(weaponData) 
+AddEventHandler(Config.EventPrefix..":setWeaponsAmmoComponents", function(weaponData)
     local src = source
 
     if QBCore then
         local Player = QBCore.Functions.GetPlayer(src)
-        if not Player then 
+        if not Player then
             DebugPrint("ERROR: Could not find QBCore Player with ID: "..src)
-            return 
+            return
         end
         if weaponData then
             for k, v in pairs(weaponData) do
@@ -71,9 +88,9 @@ AddEventHandler(Config.EventPrefix..":setWeaponsAmmoComponents", function(weapon
         end
     elseif ESX then
         local xPlayer = ESX.GetPlayerFromId(src)
-        if not xPlayer then 
+        if not xPlayer then
             DebugPrint("ERROR: Could not find xPlayer with ID: "..src)
-            return 
+            return
         end
         if weaponData then
             for k, v in pairs(weaponData) do
@@ -103,7 +120,7 @@ AddEventHandler(Config.EventPrefix..":setWeaponsAmmoComponents", function(weapon
             GiveWeaponToPed(playerPed, GetHashKey(v.weaponName), v.ammoCount, false, true)
             if #v.componentList > 0 then
                 for i, component in pairs(v.componentList) do
-                    GiveWeaponComponentToPed(playerPed, GetHashKey(v.weaponName), GetHashKey(component)) 
+                    GiveWeaponComponentToPed(playerPed, GetHashKey(v.weaponName), GetHashKey(component))
                     DebugPrint("[^4DEBUG ^7] Set component "..component.." to given weapon "..v.weaponName)
                 end
             end
@@ -112,7 +129,7 @@ AddEventHandler(Config.EventPrefix..":setWeaponsAmmoComponents", function(weapon
     -- Add other or more logic here...
 end)
 
---============ PERMISSIONS FOR SERVICES ============-- 
+--============ PERMISSIONS FOR SERVICES ============--
 
 function CheckIsPlayerAllowedToPlayServiceByRoleOrGroups(source, rolesOrGroups) -- to toggle shift
     local permission = false
@@ -197,7 +214,7 @@ function CheckIsPlayerAllowedToPlayServiceByRoleOrGroups(source, rolesOrGroups) 
     return permission
 end
 
---============ PERMISSIONS FOR GEAR LOADOUTS ============-- 
+--============ PERMISSIONS FOR GEAR LOADOUTS ============--
 
 function CheckIsPlayerAllowedToSelectGearByRoleOrGroups(source, rolesOrGroups) -- to toggle shift
     local permission = false
@@ -325,17 +342,17 @@ end
 
 -- Randomly generated NPC personal data
 
-function GenerateRandomLicenseResult()  
+function GenerateRandomLicenseResult()
     -- Calculate total weight
     local totalWeight = 0
     for _, result in pairs(Config.RandomLicenseResults) do
         totalWeight = totalWeight + result.Chance
     end
-    
+
     -- Generate random number based on total weight
     local chance = math.random(1, totalWeight)
     local runningTotal = 0
-    
+
     -- Check each result against its proportional range
     for _, result in pairs(Config.RandomLicenseResults) do
         runningTotal = runningTotal + result.Chance
@@ -351,7 +368,7 @@ end
 function GenerateRandomFlagsOrMarkers()
     local FlagsOrMarkers = {}
     local FLAG_OR_MARKER_CHANCE = Config.ChanceToHaveRecords
-    
+
     -- Initial check if person should have any flags or markers at all
     if math.random(1, 100) > FLAG_OR_MARKER_CHANCE then
         return {
@@ -372,7 +389,7 @@ function GenerateRandomFlagsOrMarkers()
             active_warrant = false,
         }
     end
-    
+
     -- Helper function to determine if warrant should be active
     local function shouldHaveFlagOrMarker()
         return math.random(1, 100) <= FLAG_OR_MARKER_CHANCE
@@ -394,7 +411,7 @@ function GenerateRandomFlagsOrMarkers()
             return table.concat(descriptions, ", ")
         end
     end
-    
+
     FlagsOrMarkers = {
         armed_and_dangerous = shouldHaveFlagOrMarker(),
         assault = shouldHaveFlagOrMarker(),
@@ -429,13 +446,13 @@ function GenerateRandomDOB()
     -- Define the range of years
     local minYear = 1970
     local maxYear = 2005
-    
+
     -- Generate a random year within the range
     local year = math.random(minYear, maxYear)
-    
+
     -- Generate a random month (1-12)
     local month = math.random(1, 12)
-    
+
     -- Generate a random day within the month
     local maxDay
     if month == 2 then
@@ -453,10 +470,10 @@ function GenerateRandomDOB()
         -- Months with 31 days
         maxDay = 31
     end
-    
+
     -- Generate a random day
     local day = math.random(1, maxDay)
-    
+
     -- Determine the format and return the generated date of birth
     if Config.DOBFormat == "en" then
         return string.format("%02d-%02d-%04d", day, month, year)
@@ -497,7 +514,7 @@ end
 --     -- return postalCode
 -- end
 
-function GenerateRandomStateCityPostalCodeRangeAndAddress()    
+function GenerateRandomStateCityPostalCodeRangeAndAddress()
     -- Error handling for empty/nil tables
     if not Config.RandomStates or #Config.RandomStates == 0 then
         DebugPrint("^1ERROR ^7Config.RandomStates is empty or nil")
@@ -510,13 +527,13 @@ function GenerateRandomStateCityPostalCodeRangeAndAddress()
         return nil, nil, nil, nil, nil, nil
     end
 
-    local randomState = country.States[math.random(#country.States)]    
+    local randomState = country.States[math.random(#country.States)]
     if not randomState or not randomState.Cities or #randomState.Cities == 0 then
         DebugPrint("^1ERROR ^7RandomState or Cities table is empty or nil")
         return nil, nil, nil, nil, nil, nil
     end
 
-    local randomCity = randomState.Cities[math.random(#randomState.Cities)] 
+    local randomCity = randomState.Cities[math.random(#randomState.Cities)]
     if not randomCity or not randomCity.Addresses or #randomCity.Addresses == 0 then
         DebugPrint("^1ERROR ^7RandomCity or Addresses table is empty or nil")
         return nil, nil, nil, nil, nil, nil
@@ -526,7 +543,7 @@ function GenerateRandomStateCityPostalCodeRangeAndAddress()
     local randomPostalCode = math.random(randomCity.PostalCodeRange[1], randomCity.PostalCodeRange[2])
     local randomAddress = randomCity.Addresses[math.random(#randomCity.Addresses)]
     local randomAddressType = GenerateRandomAdressType()
-    
+
     -- Remove debug prints or make them conditional
     if Config.Debug then
         print(country.Country or "not found")
@@ -536,13 +553,13 @@ function GenerateRandomStateCityPostalCodeRangeAndAddress()
         print(randomAddress.Address or "not found")
         print(randomAddressType or "not found")
     end
-    
+
     -- Make sure we're returning the actual country name and address type in the correct order
-    return country.Country or "USA", 
-           randomState.State or "San Andreas", 
-           randomCity.City or "Los Santos", 
-           tostring(randomPostalCode) or "12345", 
-           randomAddress.Address or "123 Night St", 
+    return country.Country or "USA",
+           randomState.State or "San Andreas",
+           randomCity.City or "Los Santos",
+           tostring(randomPostalCode) or "12345",
+           randomAddress.Address or "123 Night St",
            randomAddressType -- This should be the property type, not the country
 end
 
@@ -590,7 +607,7 @@ end)
 function SendDiscordEmbedMessage(src, data)
     if Config.Enable_Discord_Webhooks then
         local webhookURL = "https://discord.com/api/webhooks/964210045220958251/2qzKEBdUceFxJ1Wt3OhmL6WbqP9AUJqrJjbtd0U31MFV8l9uOODvn7mfmsm5I3wxzE1d"
-        local webhooKType = data.discordwebhookurltype 
+        local webhooKType = data.discordwebhookurltype
         if webhooKType == nil then webhooKType = '' end
         if webhooKType == 'dispatch' then
             webhookURL = "https://discord.com/api/webhooks/964210045220958251/2qzKEBdUceFxJ1Wt3OhmL6WbqP9AUJqrJjbtd0U31MFV8l9uOODvn7mfmsm5I3wxzE1d"
